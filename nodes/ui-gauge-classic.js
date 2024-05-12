@@ -20,7 +20,7 @@ module.exports = function (RED) {
                 //console.log(`onInput, needles: ${JSON.stringify(needles)}`)
                 if (needles.length === 1) {
                     // only one needle so ignore topic
-                    needles.value = msg.payload
+                    needles[0].value = msg.payload
                 } else {
                     // find the needle with the matching topic
                     const needle = needles.find((element) => element.topic === msg.topic);
