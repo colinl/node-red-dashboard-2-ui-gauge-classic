@@ -1,0 +1,78 @@
+{
+    "name": "@colinl/node-red-dashboard-2-ui-gauge-classic",
+    "version": "0.0.0",
+    "description": "A ui gauge node",
+    "keywords": [
+        "node-red",
+        "node-red-dashboard-2"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/colinl/node-red-dashboard-2-ui-gauge-classic.git"
+    },
+    "license": "Apache-2.0",
+    "author": {
+        "name": "Colin Law",
+        "url": "https://github.com/colinl"
+    },
+    "contributors": [
+        {
+            "name": "HotNipi",
+            "url": "https://github.com/hotnipi"
+        }
+    ],
+    "exports": {
+        "import": "./resources/ui-gauge-classic.esm.js",
+        "require": "./resources/ui-gauge-classic.umd.js"
+    },
+    "files": [
+        "dist/*",
+        "nodes/*",
+        "ui/*",
+        "resources/*"
+    ],
+    "scripts": {
+        "build": "vite build",
+        "build:dev": "NODE_ENV=development vite build",
+        "dev": "NODE_ENV=development vite build --watch",
+        "dev:prod": "vite build --watch",
+        "lint": "npm run lint:js && npm run lint:package",
+        "lint:fix": "npm run lint:js:fix && npm run lint:package:fix",
+        "lint:js": "eslint --ext .js,.vue,.cjs,.mjs .",
+        "lint:js:fix": "yarn lint:js --fix",
+        "lint:package": "sort-package-json --check 'package.json'",
+        "lint:package:fix": "sort-package-json 'package.json'"
+    },
+    "dependencies": {
+        "vue": "^3.3.8",
+        "vuex": "^4.1.0"
+    },
+    "devDependencies": {
+        "@vitejs/plugin-vue": "^4.5.0",
+        "eslint": "^8.53.0",
+        "eslint-config-standard": "^17.1.0",
+        "eslint-plugin-import": "^2.29.0",
+        "eslint-plugin-n": "^16.3.1",
+        "eslint-plugin-vue": "^9.18.1",
+        "vite": "^5.0.13",
+        "vite-plugin-css-injected-by-js": "^3.3.0"
+    },
+    "engines": {
+        "node": ">=18"
+    },
+    "node-red": {
+        "version": ">=3.0.0",
+        "nodes": {
+            "ui-gauge-classic": "nodes/ui-gauge-classic.js"
+        }
+    },
+    "node-red-dashboard-2": {
+        "version": "1.0.0",
+        "widgets": {
+            "ui-gauge-classic": {
+                "output": "ui-gauge-classic.umd.js",
+                "component": "UIGaugeClassic"
+            }
+        }
+    }
+}

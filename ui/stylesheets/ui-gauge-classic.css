@@ -1,0 +1,53 @@
+.ui-gauge-cl-wrapper {
+    padding: 10px;
+    margin: 10px;
+    border: 1px solid black;
+}
+
+.ui-gauge-cl-class {
+    color: green;
+    font-weight: bold;
+}
+
+.cl-gauge{
+    position:relative;
+}
+
+.cl-gauge .label {
+    fill:currentColor;
+    font-size:0.5rem;
+    alignment-baseline:hanging;
+}
+
+.cl-gauge .value {
+    fill:currentColor;
+}
+.cl-gauge .units {
+    fill:currentColor;
+    font-size:0.4rem;
+}
+.cl-gauge .measurement {
+    fill:currentColor;
+    font-size:0.5rem;
+}
+.cl-gauge .num{
+    fill:currentColor;
+    fill-opacity:0.6;
+    font-size:.35rem;
+}
+.cl-gauge .tick-minor{
+    fill:none;
+    stroke:currentColor;
+    stroke-opacity:0.6;
+}
+.cl-gauge .tick-major{
+    fill:none;
+    stroke:currentColor;
+}
+.cl-gauge .sector{
+    fill:none;
+    stroke:transparent;
+}
+.cl-gauge .o-needle{
+    transition:.5s;
+}
