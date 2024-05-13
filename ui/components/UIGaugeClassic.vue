@@ -1,12 +1,14 @@
 <!-- A classic style Gauge by @colinl
   Based on original work by @HotNipi 
+  style="stroke-dasharray: 0 85.65552370012571 46.9065963119736 var(--dash); stroke: orange;"
 -->
 <template>
     <!-- Component must be wrapped in a block so props such as className and style can be passed in from parent -->
     <div className="ui-gauge-cl-wrapper" :class="class">
-        <svg class="cl-gauge" ref="cl-gauge" width="100%" height="100%" :view-box.camel="theViewBox">
+        <svg class="cl-gauge" ref="cl-gauge" width="100%" height="100%" :view-box.camel="theViewBox" :style="`--dash: ${this.arc.arcLength};`">
             <g>
-                <path v-for="(item, index) in sectors" :key="index" :ref="'sector-' + index" class="sector" stroke-width="5" :d="arcspec" ></path>                
+                <path v-for="(item, index) in sectors" :key="index" :ref="'sector-' + index" class="sector" stroke-width="5" 
+                  :d="arcspec" :style="strokeStyle(index)" ></path>
 
                 <path class="tick-minor" stroke-width="5" :d="arcspec" :style="tickStyle(this.minorDivision, 0.5)"></path>
                 <path ref="arc" class="tick-major" stroke-width="5" :d="arcspec" :style="tickStyle(this.majorDivision, 1)"></path>
@@ -21,7 +23,7 @@
                 <text class="value" :y="`${this.valueTextY}`" x="50%" text-anchor="middle">{{formattedValue}}</text>
             </g>
             <g v-for="(item, index) in needles" :ref="'o-needle-'+index" class="o-needle" 
-              :style="`transform-box: fill-box; transform-origin: 50% 100%; rotate: ${item.rotation}`"
+              :style="`transform-box: fill-box; transform-origin: 50% 100%; rotate: ${item.rotation};`"
               v-html="needle(needles[index].lengthPercent,needles[index].colour)">
             </g>
             <g>
@@ -84,7 +86,7 @@ export default {
                 starty: 90,
                 endx: 90,
                 endy: 90,
-                arclength: 100,
+                arcLength: 100,
             },
             sweepAngle: 246,    // this is not inside arc as it comes from the message
             class: "",
@@ -149,7 +151,7 @@ export default {
             })
         })
 
-        console.log(`props: ${JSON.stringify(this.props)}`)
+        //console.log(`props: ${JSON.stringify(this.props)}`)
         // pickup node properties to local data
         this.pickupProperties()
         // initialise needle positions
@@ -186,18 +188,17 @@ export default {
             this.class = props.myclass
 
             this.calculateDerivedValues()
-            
-            // this is the first message so do the initial setup
-            // determine arc length, radius is 50
-            const arcLength = 2*Math.PI*this.arc.radius * this.sweepAngle/360
-            const sec = this.sectorData(arcLength)
-            const gauge = this.getElement('cl-gauge',true)
-            gauge.style.setProperty('--dash',arcLength)
-            sec.forEach(s =>{
-                const sector = this.getElement(s.name,false)
-                sector.style.setProperty("stroke-dasharray",s.css)
-                sector.style.setProperty("stroke",s.color)
-            })
+        },
+        strokeStyle: function(i) {
+            // returns the css style for sector[i]
+            //console.log(`strokeStyle i: ${i}`)
+            const sector = this.sectors[i]
+            const params = {minIn: this.min, maxIn: this.max, minOut:0, maxOut: this.arc.arcLength}
+            const start = this.range(sector.start,params,false)
+            const end = this.range(sector.end,params,false)
+            const pos = Math.min(start, end)
+            const span = Math.max(start, end) - pos
+            return `stroke-dasharray: 0 ${pos} ${span} var(--dash); stroke: ${sector.color};`
         },
         calculateDerivedValues: function() {
             // validates values and calculates derived values
@@ -254,6 +255,7 @@ export default {
 
         },
         processMsg: function(msg) {
+            //console.log(`processMessage, $refs: ${JSON.stringify(this.$refs)}`)
             if (msg.needles) {
                 this.needles.forEach((needle, index) => {
                     //const value = this.needles.length === 1  ?  this.msg.payload  :  this.msg.payload[needle.topic]
@@ -272,7 +274,10 @@ export default {
             if(base){
                 return this.$refs[name]
             }
-            //if (!this.$refs[name]) console.log(`ref: ${name}`)
+            if (!this.$refs[name]) {
+                console.log(`getElement, no ref for "${name}"\n$refs: ${JSON.stringify(this.$refs)}`)
+                return null
+            }
             return this.$refs[name][0]
         },
         validate: function(data){
@@ -326,20 +331,6 @@ export default {
             }
             return nums 
         },
-        sectorData:function(full){               
-            let ret = []
-            this.sectors.forEach((sector,idx) => {
-                let sec = {name:'sector-'+idx,color:sector.color}
-                const params = {minIn:this.min, maxIn:this.max, minOut:0, maxOut:full}
-                const start = this.range(sector.start,params,false)
-                const end = this.range(sector.end,params,false)
-                const pos = Math.min(start, end)
-                const span = Math.max(start, end) - pos
-                sec.css = `0 ${pos} ${span} var(--dash)`
-                ret.push(sec)
-            })
-            return ret
-        },
         rotation:function(v){
             // allow pointer to go 10% off ends of scale, but not more than half way to the other end of the scale
             // except in the special case of widget height is half the width, in which case only 2% so that needle does not go
@@ -380,7 +371,7 @@ export default {
             return `<path d="M ${cx},${cy} ${cx-1.5},${cy} ${cx-0.15},${cy-length} ${cx+0.15},${cy-length} ${cx+1.5},${cy} z"
                 fill="${colour}"></path>`
         },
-    }
+    },
 }
 </script>
 

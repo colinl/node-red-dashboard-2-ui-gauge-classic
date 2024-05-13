@@ -77,7 +77,7 @@
           starty: 90,
           endx: 90,
           endy: 90,
-          arclength: 100
+          arcLength: 100
         },
         sweepAngle: 246,
         // this is not inside arc as it comes from the message
@@ -130,7 +130,6 @@
           msg
         });
       });
-      console.log(`props: ${JSON.stringify(this.props)}`);
       this.pickupProperties();
       this.needles.forEach((needle) => {
         needle.rotation = this.rotation(null);
@@ -161,15 +160,15 @@
         this.sweepAngle = props.sweep_angle || 246;
         this.class = props.myclass;
         this.calculateDerivedValues();
-        const arcLength = 2 * Math.PI * this.arc.radius * this.sweepAngle / 360;
-        const sec = this.sectorData(arcLength);
-        const gauge = this.getElement("cl-gauge", true);
-        gauge.style.setProperty("--dash", arcLength);
-        sec.forEach((s) => {
-          const sector = this.getElement(s.name, false);
-          sector.style.setProperty("stroke-dasharray", s.css);
-          sector.style.setProperty("stroke", s.color);
-        });
+      },
+      strokeStyle: function(i) {
+        const sector = this.sectors[i];
+        const params = { minIn: this.min, maxIn: this.max, minOut: 0, maxOut: this.arc.arcLength };
+        const start = this.range(sector.start, params, false);
+        const end = this.range(sector.end, params, false);
+        const pos = Math.min(start, end);
+        const span = Math.max(start, end) - pos;
+        return `stroke-dasharray: 0 ${pos} ${span} var(--dash); stroke: ${sector.color};`;
       },
       calculateDerivedValues: function() {
         const cyLow = 64;
@@ -226,6 +225,11 @@
         if (base) {
           return this.$refs[name];
         }
+        if (!this.$refs[name]) {
+          console.log(`getElement, no ref for "${name}"
+$refs: ${JSON.stringify(this.$refs)}`);
+          return null;
+        }
         return this.$refs[name][0];
       },
       validate: function(data) {
@@ -274,20 +278,6 @@
           nums.push({ r: degrees, n });
         }
         return nums;
-      },
-      sectorData: function(full) {
-        let ret = [];
-        this.sectors.forEach((sector, idx) => {
-          let sec = { name: "sector-" + idx, color: sector.color };
-          const params = { minIn: this.min, maxIn: this.max, minOut: 0, maxOut: full };
-          const start = this.range(sector.start, params, false);
-          const end = this.range(sector.end, params, false);
-          const pos = Math.min(start, end);
-          const span = Math.max(start, end) - pos;
-          sec.css = `0 ${pos} ${span} var(--dash)`;
-          ret.push(sec);
-        });
-        return ret;
       },
       rotation: function(v) {
         const factor = this.height / this.width == 0.5 ? 0.02 : 0.1;
@@ -355,7 +345,8 @@
               ref: "cl-gauge",
               width: "100%",
               height: "100%",
-              viewBox: $options.theViewBox
+              viewBox: $options.theViewBox,
+              style: vue.normalizeStyle(`--dash: ${this.arc.arcLength};`)
             }, [
               vue.createElementVNode("g", null, [
                 (vue.openBlock(true), vue.createElementBlock(
@@ -368,8 +359,9 @@
                       ref: "sector-" + index,
                       class: "sector",
                       "stroke-width": "5",
-                      d: $options.arcspec
-                    }, null, 8, _hoisted_2);
+                      d: $options.arcspec,
+                      style: vue.normalizeStyle($options.strokeStyle(index))
+                    }, null, 12, _hoisted_2);
                   }),
                   128
                   /* KEYED_FRAGMENT */
@@ -436,7 +428,7 @@
                     ref_for: true,
                     ref: "o-needle-" + index,
                     class: "o-needle",
-                    style: vue.normalizeStyle(`transform-box: fill-box; transform-origin: 50% 100%; rotate: ${item.rotation}`),
+                    style: vue.normalizeStyle(`transform-box: fill-box; transform-origin: 50% 100%; rotate: ${item.rotation};`),
                     innerHTML: $options.needle($data.needles[index].lengthPercent, $data.needles[index].colour)
                   }, null, 12, _hoisted_10);
                 }),
@@ -451,7 +443,7 @@
                   r: "3"
                 }, null, 8, _hoisted_11)
               ])
-            ], 8, _hoisted_1))
+            ], 12, _hoisted_1))
           ],
           2
           /* CLASS */
