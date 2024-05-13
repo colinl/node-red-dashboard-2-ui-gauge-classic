@@ -72,6 +72,7 @@
           // the angle of the start and end points of the arc.  Zero is vertically up from the centre
           endDegrees: 123,
           // +ve values are clockwise
+          sweepAngle: 246,
           // derived values, values here are just to stop errors before first message received
           startx: 10,
           starty: 90,
@@ -79,8 +80,6 @@
           endy: 90,
           arcLength: 100
         },
-        sweepAngle: 246,
-        // this is not inside arc as it comes from the message
         class: "",
         //don't change these
         value: null,
@@ -157,7 +156,7 @@
         this.units = props.units;
         this.measurement = props.measurement;
         this.needles = JSON.parse(props.needles);
-        this.sweepAngle = props.sweep_angle || 246;
+        this.arc.sweepAngle = props.sweep_angle || 246;
         this.class = props.myclass;
         this.calculateDerivedValues();
       },
@@ -193,10 +192,10 @@
           this.unitsTextY = this.arc.cy - 23;
           this.valueTextY = this.arc.cy - 8;
         }
-        if (this.sweepAngle) {
-          this.sweepAngle = Math.min(360, this.sweepAngle);
-          this.arc.startDegrees = -this.sweepAngle / 2;
-          this.arc.endDegrees = this.sweepAngle / 2;
+        if (this.arc.sweepAngle) {
+          this.arc.sweepAngle = Math.min(360, this.arc.sweepAngle);
+          this.arc.startDegrees = -this.arc.sweepAngle / 2;
+          this.arc.endDegrees = this.arc.sweepAngle / 2;
         }
         const startRadians = this.arc.startDegrees * Math.PI / 180;
         const endRadians = this.arc.endDegrees * Math.PI / 180;
@@ -220,17 +219,6 @@
             needle.rotation = this.rotation(v);
           });
         }
-      },
-      getElement: function(name, base) {
-        if (base) {
-          return this.$refs[name];
-        }
-        if (!this.$refs[name]) {
-          console.log(`getElement, no ref for "${name}"
-$refs: ${JSON.stringify(this.$refs)}`);
-          return null;
-        }
-        return this.$refs[name][0];
       },
       validate: function(data) {
         let ret;

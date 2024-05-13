@@ -1,6 +1,5 @@
 <!-- A classic style Gauge by @colinl
-  Based on original work by @HotNipi 
-  style="stroke-dasharray: 0 85.65552370012571 46.9065963119736 var(--dash); stroke: orange;"
+  Based on original work by @HotNipi
 -->
 <template>
     <!-- Component must be wrapped in a block so props such as className and style can be passed in from parent -->
@@ -81,6 +80,7 @@ export default {
                 radius: 47.5,       // the radius of the arc
                 startDegrees: -123, // the angle of the start and end points of the arc.  Zero is vertically up from the centre
                 endDegrees: 123,    // +ve values are clockwise
+                sweepAngle: 246,
                 // derived values, values here are just to stop errors before first message received
                 startx: 10,
                 starty: 90,
@@ -88,7 +88,6 @@ export default {
                 endy: 90,
                 arcLength: 100,
             },
-            sweepAngle: 246,    // this is not inside arc as it comes from the message
             class: "",
 
             //don't change these
@@ -184,7 +183,7 @@ export default {
             this.units = props.units
             this.measurement = props.measurement
             this.needles = JSON.parse(props.needles)
-            this.sweepAngle = props.sweep_angle || 246
+            this.arc.sweepAngle = props.sweep_angle || 246
             this.class = props.myclass
 
             this.calculateDerivedValues()
@@ -232,10 +231,10 @@ export default {
             }
             // calculate start and end degrees from sweepAngle
             // check for undefined or 0, both are innapropriate
-            if (this.sweepAngle) {
-                this.sweepAngle = Math.min(360, this.sweepAngle)
-                this.arc.startDegrees = -this.sweepAngle/2
-                this.arc.endDegrees = this.sweepAngle/2
+            if (this.arc.sweepAngle) {
+                this.arc.sweepAngle = Math.min(360, this.arc.sweepAngle)
+                this.arc.startDegrees = -this.arc.sweepAngle/2
+                this.arc.endDegrees = this.arc.sweepAngle/2
             }
 
             const startRadians = this.arc.startDegrees * Math.PI/180
@@ -268,17 +267,6 @@ export default {
                     needle.rotation = this.rotation(v)
                 })
             }
-        },
-        getElement: function(name,base){
-            //console.log(`in getElement`)
-            if(base){
-                return this.$refs[name]
-            }
-            if (!this.$refs[name]) {
-                console.log(`getElement, no ref for "${name}"\n$refs: ${JSON.stringify(this.$refs)}`)
-                return null
-            }
-            return this.$refs[name][0]
         },
         validate: function(data){
             let ret                
