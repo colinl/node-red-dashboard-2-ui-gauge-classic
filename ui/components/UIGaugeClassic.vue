@@ -66,7 +66,7 @@ export default {
             // Coloured sectors around the scale.  Sectors can be in any order and it makes no difference if 
             // start and end are reversed.
             //  Any gaps are left at background colour
-            sectors:[{start:0,end:0.4,color:"skyblue"},{start:0.4,end:0.75,color:"green"},{start:0.75,end:1.4,color:"red"}],
+            sectors:[],
 
 
             // The position and alignment of the gauge inside the 100x100 svg box for the widget can be changed by modifying the settings below
@@ -131,6 +131,7 @@ export default {
             // load the latest message from the Node-RED datastore when this widget is loaded
             // storing it in our vuex store so that we have it saved as we navigate around
             console.log(`On widget-load ${JSON.stringify(msg)}`)
+            console.log(`sectors: ${JSON.stringify(this.sectors)}`)
             this.processMsg(msg)     // pick up needle values
             this.$store.commit('data/bind', {
                 widgetId: this.id,
@@ -150,7 +151,7 @@ export default {
             })
         })
 
-        //console.log(`props: ${JSON.stringify(this.props)}`)
+        console.log(`props: ${JSON.stringify(this.props)}`)
         // pickup node properties to local data
         this.pickupProperties()
         // initialise needle positions
@@ -174,7 +175,7 @@ export default {
             this.max = Number(props.max)
             this.width = Number(props.width)      // width and height in dashboard 2 units, 0,0 (auto) is coped with below
             this.height = Number(props.height)
-            this.sectors = JSON.parse(props.sectors)
+            this.sectors = props.sectors
             this.majorDivision = Number(props.major_division)
             this.minorDivision = Number(props.minor_division)
             this.valueDecimalPlaces = Number(props.value_decimal_places)

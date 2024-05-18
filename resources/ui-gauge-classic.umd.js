@@ -56,7 +56,8 @@
         // Coloured sectors around the scale.  Sectors can be in any order and it makes no difference if 
         // start and end are reversed.
         //  Any gaps are left at background colour
-        sectors: [{ start: 0, end: 0.4, color: "skyblue" }, { start: 0.4, end: 0.75, color: "green" }, { start: 0.75, end: 1.4, color: "red" }],
+        //sectors:[{start:0,end:0.4,color:"skyblue"},{start:0.4,end:0.75,color:"green"},{start:0.75,end:1.4,color:"red"}],
+        sectors: [],
         // The position and alignment of the gauge inside the 100x100 svg box for the widget can be changed by modifying the settings below
         // The origin of the svg box is the top left hand corner. The bottom right hand corner is 100,100
         // Obviously, if you move the gauge you may have to move the text fields also.
@@ -115,6 +116,7 @@
     mounted() {
       this.$socket.on("widget-load:" + this.id, (msg) => {
         console.log(`On widget-load ${JSON.stringify(msg)}`);
+        console.log(`sectors: ${JSON.stringify(this.sectors)}`);
         this.processMsg(msg);
         this.$store.commit("data/bind", {
           widgetId: this.id,
@@ -129,6 +131,7 @@
           msg
         });
       });
+      console.log(`props: ${JSON.stringify(this.props)}`);
       this.pickupProperties();
       this.needles.forEach((needle) => {
         needle.rotation = this.rotation(null);
@@ -147,7 +150,8 @@
         this.max = Number(props.max);
         this.width = Number(props.width);
         this.height = Number(props.height);
-        this.sectors = JSON.parse(props.sectors);
+        this.sectors = props.sectors;
+        console.log(`pickupProperties sectors: ${this.sectors}`);
         this.majorDivision = Number(props.major_division);
         this.minorDivision = Number(props.minor_division);
         this.valueDecimalPlaces = Number(props.value_decimal_places);

@@ -20,7 +20,11 @@
             height: { value: 0 },
             min: { value: 0 },
             max: { value: 10 },
-            sectors: { value: `[{"start":0,"end":4,"color":"skyblue"},{"start":4,"end":6.5,"color":"green"},{"start":6.5,"end":10,"color":"red"}]` },
+            sectors: {
+                value: [
+                    {start: "", end: "", color: ""}
+                ],
+            },
             major_division: {value: 1},
             minor_division: {value: 0.2},
             value_decimal_places: {value: 1},
@@ -40,13 +44,78 @@
             return this.name || "gauge classic";
         },
         oneditprepare: function () {
+            var node = this
             $('#node-input-size').elementSizer({
                 width: '#node-input-width',
                 height: '#node-input-height',
                 group: '#node-input-group'
             });
-        }
-    });
+
+            let sectorsList = $("#node-input-sectors-container")
+            sectorsList.editableList({
+                addItem: function(container, i, sector) {
+                    if (!sector.hasOwnProperty("start")) {
+                        sector = {from: "", to: "", color: ""}
+                    }
+                    let row =  $('<div/>', {
+                        class: 'form-row',
+                        style: 'display: flex; margin-bottom: 0;'
+                    }).appendTo(container)
+
+                    let startField = $('<input/>', {
+                        type: 'text',
+                        style: 'margin-left: 5px; margin-bottom: 0;',
+                        class: 'node-input-sector-start-value'
+                    }).appendTo(row)
+
+                    let endField = $('<input/>', {
+                        type: 'text',
+                        style: 'margin-left: 5px; margin-bottom: 0;',
+                        class: 'node-input-sector-end-value'
+                    }).appendTo(row)
+
+                    let colorField = $('<input/>', {
+                        type: 'text',
+                        style: 'margin-left: 5px; margin-bottom: 0;',
+                        class: 'node-input-sector-color-value'
+                    }).appendTo(row)
+
+                    startField.val(sector.start)
+                    endField.val(sector.end)
+                    colorField.val(sector.color)
+                },
+                sortable: true,
+                removable: true,
+                height: 'auto',
+                scrollOnAdd: true,
+                header: $('<div>').append(
+                    $.parseHTML(
+                        "<div style='width:30%; margin-left:10%; display:inline-grid;'>Start</div><div style='width:30%; display:inline-grid;'>End</div><div style='width:30%; display:inline-grid;'>Colour</div>"
+                    )
+                ),
+
+                addButton: 'add sector'
+            })
+            this.sectors = this.sectors || []
+            console.log(`About to add items: ${JSON.stringify(this.sectors)}`)
+            sectorsList.editableList('addItems', this.sectors)
+        },
+        oneditsave: function() {
+            let sectors = $("#node-input-sectors-container").editableList('items');
+            var node = this;
+            node.sectors = [];
+            sectors.each(function(i) {
+                node.sectors.push({
+                    start: Number($(this).find('.node-input-sector-start-value').val()),
+                    end: Number($(this).find('.node-input-sector-end-value').val()),
+                    color: $(this).find('.node-input-sector-color-value').val()
+                })
+            });
+
+            console.log(`oneditsave sectors: ${JSON.stringify(node.sectors)}`)
+        },
+    })
+   // });
 </script>
 
 <script type="text/html" data-template-name="ui-gauge-classic">
@@ -72,11 +141,12 @@
         <label for="node-input-max"><i class="fa fa-hand"></i>Max</label>
         <input type="text" id="node-input-max">
     </div>
-    <div class="form-row">
-        <label for="node-input-sectors"><i class="fa fa-hand"></i>Sectors</label>
-        <input type="text" id="node-input-sectors">
+
+    <div class="form-row node-input-sectors-container-row">
+      <label><i class="fa fa-list"></i> Sectors</label>
+      <ol id="node-input-sectors-container"></ol>
     </div>
-    <div class="form-row">
+     <div class="form-row">
         <label for="node-input-major_divison"><i class="fa fa-hand"></i>Major Division</label>
         <input type="text" id="node-input-major_division">
     </div>
