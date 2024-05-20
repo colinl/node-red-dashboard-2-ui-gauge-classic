@@ -16,7 +16,7 @@
 .cl-gauge .label {
     fill:currentColor;
     font-size:0.5rem;
-    alignment-baseline:hanging;
+    dominant-baseline:hanging;
 }
 
 .cl-gauge .value {
