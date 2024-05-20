@@ -23,7 +23,7 @@
             </g>
             <g v-for="(item, index) in needles" :ref="'o-needle-'+index" class="o-needle" 
               :style="`transform-box: fill-box; transform-origin: 50% 100%; rotate: ${item.rotation};`"
-              v-html="needle(needles[index].lengthPercent,needles[index].colour)">
+              v-html="needle(needles[index].lengthPercent,needles[index].color)">
             </g>
             <g>
                 <circle class="hub" :cx="`${this.arc.cx}`" :cy="`${this.arc.cy}`" r="3"></circle>
@@ -46,8 +46,8 @@ export default {
         state: { type: Object, default: () => ({ enabled: false, visible: false }) }
     },
     setup (props) {
-        console.info('UIGaugeClassic setup with:', props)
-        console.debug('Vue function loaded correctly', markRaw)
+        //console.info('UIGaugeClassic setup with:', props)
+        //console.debug('Vue function loaded correctly', markRaw)
     },
     data () {
         return {
@@ -130,18 +130,17 @@ export default {
         this.$socket.on('widget-load:' + this.id, (msg) => {
             // load the latest message from the Node-RED datastore when this widget is loaded
             // storing it in our vuex store so that we have it saved as we navigate around
-            console.log(`On widget-load ${JSON.stringify(msg)}`)
-            console.log(`sectors: ${JSON.stringify(this.sectors)}`)
-            this.processMsg(msg)     // pick up needle values
+            //console.log(`On widget-load ${JSON.stringify(msg)}`)
+            //console.log(`sectors: ${JSON.stringify(this.sectors)}`)
+            this.processMsg(msg)     // pick up message values
             this.$store.commit('data/bind', {
                 widgetId: this.id,
                 msg
             })
         })
         this.$socket.on('msg-input:' + this.id, (msg) => {
-            console.log(`Message received: ${JSON.stringify(msg)}`)
+            //console.log(`Message received: ${JSON.stringify(msg)}`)
             // new message received
-            // pickup needle values from msg.needles, which is maintained in server in ui-gauge-cdl.js
             this.processMsg(msg)
 
             // store the latest message in our client-side vuex store when we receive a new message
@@ -151,7 +150,7 @@ export default {
             })
         })
 
-        console.log(`props: ${JSON.stringify(this.props)}`)
+        //console.log(`props: ${JSON.stringify(this.props)}`)
         // pickup node properties to local data
         this.pickupProperties()
         // initialise needle positions
@@ -183,7 +182,7 @@ export default {
             this.label = props.label
             this.units = props.units
             this.measurement = props.measurement
-            this.needles = JSON.parse(props.needles)
+            this.needles = props.needles
             this.arc.sweepAngle = props.sweep_angle || 246
             this.class = props.myclass
 
@@ -255,10 +254,10 @@ export default {
 
         },
         processMsg: function(msg) {
+            // The message fed in is processed in ui-gauge-classic.js and needle values are joined into msg.needles
             //console.log(`processMessage, $refs: ${JSON.stringify(this.$refs)}`)
             if (msg.needles) {
                 this.needles.forEach((needle, index) => {
-                    //const value = this.needles.length === 1  ?  this.msg.payload  :  this.msg.payload[needle.topic]
                     const v = this.validate(msg.needles[index].value)       // this copes with undefined value
                     // the value displayed is from the first needle
                     if (index === 0) {
@@ -353,12 +352,12 @@ export default {
             // stroke-dashoffset sets the first tick to half width
             return `stroke-dasharray: ${width} ${tickPeriod-width}; stroke-dashoffset: ${width/2};`
         },
-        needle: function(lengthPercent, colour) {
+        needle: function(lengthPercent, color) {
             const cx = this.arc.cx
             const cy = this.arc.cy
             const length = (this.arc.radius - 4.5) * lengthPercent/100
             return `<path d="M ${cx},${cy} ${cx-1.5},${cy} ${cx-0.15},${cy-length} ${cx+0.15},${cy-length} ${cx+1.5},${cy} z"
-                fill="${colour}"></path>`
+                fill="${color}"></path>`
         },
     },
 }

@@ -31,8 +31,6 @@
       state: { type: Object, default: () => ({ enabled: false, visible: false }) }
     },
     setup(props) {
-      console.info("UIGaugeClassic setup with:", props);
-      console.debug("Vue function loaded correctly", vue.markRaw);
     },
     data() {
       return {
@@ -56,7 +54,6 @@
         // Coloured sectors around the scale.  Sectors can be in any order and it makes no difference if 
         // start and end are reversed.
         //  Any gaps are left at background colour
-        //sectors:[{start:0,end:0.4,color:"skyblue"},{start:0.4,end:0.75,color:"green"},{start:0.75,end:1.4,color:"red"}],
         sectors: [],
         // The position and alignment of the gauge inside the 100x100 svg box for the widget can be changed by modifying the settings below
         // The origin of the svg box is the top left hand corner. The bottom right hand corner is 100,100
@@ -115,8 +112,6 @@
     },
     mounted() {
       this.$socket.on("widget-load:" + this.id, (msg) => {
-        console.log(`On widget-load ${JSON.stringify(msg)}`);
-        console.log(`sectors: ${JSON.stringify(this.sectors)}`);
         this.processMsg(msg);
         this.$store.commit("data/bind", {
           widgetId: this.id,
@@ -124,14 +119,12 @@
         });
       });
       this.$socket.on("msg-input:" + this.id, (msg) => {
-        console.log(`Message received: ${JSON.stringify(msg)}`);
         this.processMsg(msg);
         this.$store.commit("data/bind", {
           widgetId: this.id,
           msg
         });
       });
-      console.log(`props: ${JSON.stringify(this.props)}`);
       this.pickupProperties();
       this.needles.forEach((needle) => {
         needle.rotation = this.rotation(null);
@@ -151,7 +144,6 @@
         this.width = Number(props.width);
         this.height = Number(props.height);
         this.sectors = props.sectors;
-        console.log(`pickupProperties sectors: ${this.sectors}`);
         this.majorDivision = Number(props.major_division);
         this.minorDivision = Number(props.minor_division);
         this.valueDecimalPlaces = Number(props.value_decimal_places);
@@ -159,7 +151,7 @@
         this.label = props.label;
         this.units = props.units;
         this.measurement = props.measurement;
-        this.needles = JSON.parse(props.needles);
+        this.needles = props.needles;
         this.arc.sweepAngle = props.sweep_angle || 246;
         this.class = props.myclass;
         this.calculateDerivedValues();
@@ -294,12 +286,12 @@
         const tickPeriod = division / range * arcLength;
         return `stroke-dasharray: ${width} ${tickPeriod - width}; stroke-dashoffset: ${width / 2};`;
       },
-      needle: function(lengthPercent, colour) {
+      needle: function(lengthPercent, color) {
         const cx = this.arc.cx;
         const cy = this.arc.cy;
         const length = (this.arc.radius - 4.5) * lengthPercent / 100;
         return `<path d="M ${cx},${cy} ${cx - 1.5},${cy} ${cx - 0.15},${cy - length} ${cx + 0.15},${cy - length} ${cx + 1.5},${cy} z"
-                fill="${colour}"></path>`;
+                fill="${color}"></path>`;
       }
     }
   };
@@ -421,7 +413,7 @@
                     ref: "o-needle-" + index,
                     class: "o-needle",
                     style: vue.normalizeStyle(`transform-box: fill-box; transform-origin: 50% 100%; rotate: ${item.rotation};`),
-                    innerHTML: $options.needle($data.needles[index].lengthPercent, $data.needles[index].colour)
+                    innerHTML: $options.needle($data.needles[index].lengthPercent, $data.needles[index].color)
                   }, null, 12, _hoisted_10);
                 }),
                 256

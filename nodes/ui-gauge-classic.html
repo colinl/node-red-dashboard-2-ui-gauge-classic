@@ -32,7 +32,11 @@
             label: {value: ""},
             measurement: {value: "measurement"},
             units: {value: "°C"},
-            needles: {value: `[{"topic":"A","colour":"black","lengthPercent":100},{"topic":"B","colour":"brown","lengthPercent":67}]`},
+            needles: {
+                value: [
+                    {"topic":"","colour":"","lengthPercent":100}
+                ],
+            },
             sweep_angle: {value: 246},
             myclass: {value: ""},
         },
@@ -84,6 +88,7 @@
                     endField.val(sector.end)
                     colorField.val(sector.color)
                 },
+
                 sortable: true,
                 removable: true,
                 height: 'auto',
@@ -97,8 +102,57 @@
                 addButton: 'add sector'
             })
             this.sectors = this.sectors || []
-            console.log(`About to add items: ${JSON.stringify(this.sectors)}`)
+            //console.log(`About to add items: ${JSON.stringify(this.sectors)}`)
             sectorsList.editableList('addItems', this.sectors)
+
+            let needlesList = $("#node-input-needles-container")
+            needlesList.editableList({
+                addItem: function(container, i, needle) {
+                    if (!needle.hasOwnProperty("topic")) {
+                        needle = {topic: "", color: "", lengthPercent: 100}
+                    }
+                    let row =  $('<div/>', {
+                        class: 'form-row',
+                        style: 'display: flex; margin-bottom: 0;'
+                    }).appendTo(container)
+
+                    let topicField = $('<input/>', {
+                        type: 'text',
+                        style: 'margin-left: 5px; margin-bottom: 0;',
+                        class: 'node-input-needle-topic-value'
+                    }).appendTo(row)
+
+                    let colorField = $('<input/>', {
+                        type: 'text',
+                        style: 'margin-left: 5px; margin-bottom: 0;',
+                        class: 'node-input-needle-color-value'
+                    }).appendTo(row)
+
+                    let lengthField = $('<input/>', {
+                        type: 'text',
+                        style: 'margin-left: 5px; margin-bottom: 0;',
+                        class: 'node-input-needle-length-value'
+                    }).appendTo(row)
+                    topicField.val(needle.topic)
+                    colorField.val(needle.color)
+                    lengthField.val(needle.lengthPercent)
+                },
+
+                sortable: true,
+                removable: true,
+                height: 'auto',
+                scrollOnAdd: true,
+                header: $('<div>').append(
+                    $.parseHTML(
+                        "<div style='width:30%; margin-left:10%; display:inline-grid;'>Topic</div><div style='width:30%; display:inline-grid;'>Colour</div><div style='width:30%; display:inline-grid;'>Length %</div>"
+                    )
+                ),
+
+                addButton: 'add needle'
+            })
+            this.needles = this.needles || [{topic:"", color:"black", lengthPercent: 100}]
+            //console.log(`About to add items: ${JSON.stringify(this.needles)}`)
+            needlesList.editableList('addItems', this.needles)
         },
         oneditsave: function() {
             let sectors = $("#node-input-sectors-container").editableList('items');
@@ -112,7 +166,20 @@
                 })
             });
 
-            console.log(`oneditsave sectors: ${JSON.stringify(node.sectors)}`)
+            //console.log(`oneditsave sectors: ${JSON.stringify(node.sectors)}`)
+
+            let needles = $("#node-input-needles-container").editableList('items');
+            var node = this;
+            node.needles = [];
+            needles.each(function(i) {
+                node.needles.push({
+                    topic: $(this).find('.node-input-needle-topic-value').val(),
+                    color: $(this).find('.node-input-needle-color-value').val(),
+                    lengthPercent: $(this).find('.node-input-needle-length-value').val()
+                })
+            });
+
+            //console.log(`oneditsave needles: ${JSON.stringify(node.needles)}`)
         },
     })
    // });
@@ -174,9 +241,10 @@
         <label for="node-input-units"><i class="fa fa-hand"></i>Units</label>
         <input type="text" id="node-input-units">
     </div>
-    <div class="form-row">
-        <label for="node-input-needles"><i class="fa fa-hand"></i>Needles</label>
-        <input type="text" id="node-input-needles">
+
+    <div class="form-row node-input-needles-container-row">
+      <label><i class="fa fa-list"></i>Needles</label>
+      <ol id="node-input-needles-container"></ol>
     </div>
     <div class="form-row">
         <label for="node-input-sweep_angle"><i class="fa fa-hand"></i>Sweep Angle (deg)</label>

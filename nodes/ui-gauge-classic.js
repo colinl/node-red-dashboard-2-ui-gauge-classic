@@ -10,7 +10,8 @@ module.exports = function (RED) {
 
         const base = group.getBase()
 
-        let needles = JSON.parse(config.needles)
+        let needles = config.needles
+        //console.log(`needles: ${JSON.stringify(needles)}`)
 
         // server-side event handlers
         const evts = {
@@ -38,6 +39,7 @@ module.exports = function (RED) {
                 send(msg)
             },
             onSocket: {
+                /*
                 'my-custom-event': function (conn, id, msg) {
                     console.info('"my-custom-event" received:', conn.id, id, msg)
                     console.info('conn.id:', conn.id)
@@ -47,6 +49,7 @@ module.exports = function (RED) {
                     // emit a msg in Node-RED from this node
                     node.send(msg)
                 }
+                */
             }
         }
 
