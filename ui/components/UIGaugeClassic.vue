@@ -3,7 +3,7 @@
 -->
 <template>
     <!-- Component must be wrapped in a block so props such as className and style can be passed in from parent -->
-    <div className="ui-gauge-cl-wrapper" :class="class">
+    <div className="ui-gauge-cl-wrapper" :class="class" :style="wrapperStyle">
         <svg class="cl-gauge" ref="cl-gauge" width="100%" height="100%" :view-box.camel="theViewBox" :style="`--dash: ${this.arc.arcLength};`">
             <g>
                 <path v-for="(item, index) in sectors" :key="index" :ref="'sector-' + index" class="sector" stroke-width="5" 
@@ -102,6 +102,15 @@ export default {
     },
     computed: {
         ...mapState('data', ['messages']),
+        wrapperStyle: function() {
+            // should not need this, it should be done by the dashboard
+            // See https://discourse.nodered.org/t/custom-ui-node-containing-svg-image-not-sizing-correctly-on-dashboard/88152
+            let rowSpan = this.props.height
+            if (!rowSpan) {
+                rowSpan = "null"    // size is auto
+            }
+            return `grid-row-end: span ${rowSpan};`
+        },
         arcspec: function() {
             const delta = this.arc.endDegrees - this.arc.startDegrees
             // if more than 180 deg sweep then large-arg-flag should be 1
