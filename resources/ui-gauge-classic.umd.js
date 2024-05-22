@@ -90,6 +90,13 @@
     },
     computed: {
       ...vuex.mapState("data", ["messages"]),
+      wrapperStyle: function() {
+        let rowSpan = this.props.height;
+        if (!rowSpan) {
+          rowSpan = "null";
+        }
+        return `grid-row-end: span ${rowSpan};`;
+      },
       arcspec: function() {
         const delta = this.arc.endDegrees - this.arc.startDegrees;
         const largeArcFlag = delta > 180 ? 1 : 0;
@@ -321,7 +328,8 @@
           "div",
           {
             className: "ui-gauge-cl-wrapper",
-            class: vue.normalizeClass($data.class)
+            class: vue.normalizeClass($data.class),
+            style: vue.normalizeStyle($options.wrapperStyle)
           },
           [
             (vue.openBlock(), vue.createElementBlock("svg", {
@@ -429,8 +437,8 @@
               ])
             ], 12, _hoisted_1))
           ],
-          2
-          /* CLASS */
+          6
+          /* CLASS, STYLE */
         )
       ],
       2112
