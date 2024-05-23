@@ -1,6 +1,6 @@
 {
     "name": "@colinl/node-red-dashboard-2-ui-gauge-classic",
-    "version": "0.0.4",
+    "version": "0.0.5-beta",
     "description": "A ui gauge node",
     "keywords": [
         "node-red",
