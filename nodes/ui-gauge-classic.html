@@ -22,7 +22,7 @@
             max: { value: 10 },
             sectors: {
                 value: [
-                    {start: "", end: "", color: ""}
+                    {start: "",color: ""}
                 ],
             },
             major_division: {value: 1},
@@ -59,7 +59,7 @@
             sectorsList.editableList({
                 addItem: function(container, i, sector) {
                     if (!sector.hasOwnProperty("start")) {
-                        sector = {from: "", to: "", color: ""}
+                        sector = {start: "", color: ""}
                     }
                     let row =  $('<div/>', {
                         class: 'form-row',
@@ -72,12 +72,6 @@
                         class: 'node-input-sector-start-value'
                     }).appendTo(row)
 
-                    let endField = $('<input/>', {
-                        type: 'text',
-                        style: 'margin-left: 5px; margin-bottom: 0;',
-                        class: 'node-input-sector-end-value'
-                    }).appendTo(row)
-
                     let colorField = $('<input/>', {
                         type: 'text',
                         style: 'margin-left: 5px; margin-bottom: 0;',
@@ -85,7 +79,6 @@
                     }).appendTo(row)
 
                     startField.val(sector.start)
-                    endField.val(sector.end)
                     colorField.val(sector.color)
                 },
 
@@ -95,7 +88,7 @@
                 scrollOnAdd: true,
                 header: $('<div>').append(
                     $.parseHTML(
-                        "<div style='width:30%; margin-left:10%; display:inline-grid;'>Start</div><div style='width:30%; display:inline-grid;'>End</div><div style='width:30%; display:inline-grid;'>Colour</div>"
+                        "<div style='width:40%; margin-left:10%; display:inline-grid;'>Start</div><div style='width:30%; display:inline-grid;'>Colour</div>"
                     )
                 ),
 
@@ -144,7 +137,7 @@
                 scrollOnAdd: true,
                 header: $('<div>').append(
                     $.parseHTML(
-                        "<div style='width:30%; margin-left:10%; display:inline-grid;'>Topic</div><div style='width:30%; display:inline-grid;'>Colour</div><div style='width:30%; display:inline-grid;'>Length %</div>"
+                        "<div style='width:30%; margin-left:10%; display:inline-grid;'>Topic</div><div style='width:30%; display:inline-grid;'>Colour</div><div style='width:10%; display:inline-grid;'>Length %</div>"
                     )
                 ),
 
@@ -161,7 +154,6 @@
             sectors.each(function(i) {
                 node.sectors.push({
                     start: Number($(this).find('.node-input-sector-start-value').val()),
-                    end: Number($(this).find('.node-input-sector-end-value').val()),
                     color: $(this).find('.node-input-sector-color-value').val()
                 })
             });

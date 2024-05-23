@@ -199,11 +199,18 @@ export default {
         },
         strokeStyle: function(i) {
             // returns the css style for sector[i]
-            //console.log(`strokeStyle i: ${i}`)
             const sector = this.sectors[i]
             const params = {minIn: this.min, maxIn: this.max, minOut:0, maxOut: this.arc.arcLength}
             const start = this.range(sector.start,params,false)
-            const end = this.range(sector.end,params,false)
+            // determine end for this sector
+            let sectorEnd
+            if (i >= this.sectors.length-1) {
+                // this is the last sector so use scale end as the end, allowing for reversed end points
+                sectorEnd = Math.max(this.max, this.min)
+            } else {
+                sectorEnd = this.sectors[i+1].start
+            }
+            const end = this.range(sectorEnd,params,false)
             const pos = Math.min(start, end)
             const span = Math.max(start, end) - pos
             return `stroke-dasharray: 0 ${pos} ${span} var(--dash); stroke: ${sector.color};`
