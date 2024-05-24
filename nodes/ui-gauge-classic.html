@@ -18,26 +18,70 @@
                 }
             },
             height: { value: 0 },
-            min: { value: 0 },
-            max: { value: 10 },
-            sectors: {
-                value: [
-                    {start: "",color: ""}
-                ],
+            min: { 
+                value: 0, 
+                required: true,
+                validate:function(v) {
+                    // must be a number and not the same as max
+                    const max=Number($("#node-input-max").length ? $("#node-input-max").val() : this.max)
+                    return (RED.validators.number()(v) && Number(v) !== max)
+                },
             },
-            major_division: {value: 1},
-            minor_division: {value: 0.2},
-            value_decimal_places: {value: 1},
-            scale_decimal_places: {value: 0},
+            max: { 
+                value: 10,
+                validate:function(v) {
+                    // must be a number and not the same as min
+                    const min=Number($("#node-input-min").length ? $("#node-input-min").val() : this.min)
+                    return (RED.validators.number()(v) && Number(v) !== min)
+                },
+            },
+            sectors: {
+                value: [],
+            },
+            major_division: {
+                value: 1,
+                validate:function(v) {
+                    // must be a number >0
+                    return (RED.validators.number()(v) && Number(v) > 0)
+                },
+            },
+            minor_division: {
+                value: 0.2,
+                validate:function(v) {
+                    // must be a number >0
+                    return (RED.validators.number()(v) && Number(v) > 0)
+                },
+            },
+            value_decimal_places: {
+                value: 1,
+                validate:function(v) {
+                    // must be a number >=0
+                    return (RED.validators.number()(v) && Number(v) >= 0)
+                },
+            },
+            scale_decimal_places: {
+                value: 0,
+                validate:function(v) {
+                    // must be a number >=0
+                    return (RED.validators.number()(v) && Number(v) >= 0)
+                },
+            },
             label: {value: ""},
-            measurement: {value: "measurement"},
+            measurement: {value: ""},
             units: {value: "°C"},
             needles: {
                 value: [
-                    {"topic":"","colour":"","lengthPercent":100}
+                    {"color":"black","lengthPercent":100, "topic":"",}
                 ],
             },
-            sweep_angle: {value: 246},
+            sweep_angle: {
+                value: 250,
+                validate:function(v) {
+                    // must be a number >0 and <360.
+                    const num = Number(v)
+                    return (RED.validators.number()(v) && num > 0 && num < 360)
+                },
+            },
             myclass: {value: ""},
         },
         inputs: 1,
@@ -60,6 +104,9 @@
                 addItem: function(container, i, sector) {
                     if (!sector.hasOwnProperty("start")) {
                         sector = {start: "", color: ""}
+                        if (i === 0) {
+                            sector.start = Math.min(Number($("#node-input-min").val()), Number($("#node-input-max").val())) || 0
+                        }
                     }
                     let row =  $('<div/>', {
                         class: 'form-row',
@@ -102,18 +149,12 @@
             needlesList.editableList({
                 addItem: function(container, i, needle) {
                     if (!needle.hasOwnProperty("topic")) {
-                        needle = {topic: "", color: "", lengthPercent: 100}
+                        needle = {color: "", lengthPercent: 100, topic: "", }
                     }
                     let row =  $('<div/>', {
                         class: 'form-row',
                         style: 'display: flex; margin-bottom: 0;'
                     }).appendTo(container)
-
-                    let topicField = $('<input/>', {
-                        type: 'text',
-                        style: 'margin-left: 5px; margin-bottom: 0;',
-                        class: 'node-input-needle-topic-value'
-                    }).appendTo(row)
 
                     let colorField = $('<input/>', {
                         type: 'text',
@@ -126,9 +167,16 @@
                         style: 'margin-left: 5px; margin-bottom: 0;',
                         class: 'node-input-needle-length-value'
                     }).appendTo(row)
-                    topicField.val(needle.topic)
+
+                    let topicField = $('<input/>', {
+                        type: 'text',
+                        style: 'margin-left: 5px; margin-bottom: 0;',
+                        class: 'node-input-needle-topic-value'
+                    }).appendTo(row)
+
                     colorField.val(needle.color)
                     lengthField.val(needle.lengthPercent)
+                    topicField.val(needle.topic)
                 },
 
                 sortable: true,
@@ -137,13 +185,14 @@
                 scrollOnAdd: true,
                 header: $('<div>').append(
                     $.parseHTML(
-                        "<div style='width:30%; margin-left:10%; display:inline-grid;'>Topic</div><div style='width:30%; display:inline-grid;'>Colour</div><div style='width:10%; display:inline-grid;'>Length %</div>"
+                        "<div style='width:30%; margin-left:10%; display:inline-grid;'>Colour</div><div style='width:30%; display:inline-grid;'>Length %</div><div style='width:10%; display:inline-grid;'>Topic</div>"
                     )
                 ),
 
                 addButton: 'add needle'
             })
-            this.needles = this.needles || [{topic:"", color:"black", lengthPercent: 100}]
+
+            this.needles = this.needles || []
             //console.log(`About to add items: ${JSON.stringify(this.needles)}`)
             needlesList.editableList('addItems', this.needles)
         },
