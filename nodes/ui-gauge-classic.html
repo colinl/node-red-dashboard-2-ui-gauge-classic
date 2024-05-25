@@ -87,19 +87,15 @@
                     {"color":"black","lengthPercent":"100", "topic":"",}
                 ],
                 validate:function(needles) {
-                    console.log(`validate needles: ${JSON.stringify(needles)}`)
+                    //console.log(`validate needles: ${JSON.stringify(needles)}`)
                     // Each length must be a +ve number and topic must be present unless only one needle
                     let isValid = true
                     needles.forEach((needle) => {
-                        console.log(`needle: ${JSON.stringify(needle)}`)
-                        console.log(`num: ${RED.validators.number()(needle.lengthPercent)} val: ${Number(needle.lengthPercent)>0}`)
                         isValid &&= (RED.validators.number()(needle.lengthPercent) && Number(needle.lengthPercent) > 0)
-                        console.log(`isValid a: ${isValid}`)
                         // if more than one needle then all must have topics
                         if (needles.length > 1) {
                             // checks for non-empty topic
                             isValid &&= needle.topic.trim().length > 0
-                            console.log(`isValid b: ${isValid}`)
                         }
                     })
                     return isValid
@@ -134,7 +130,10 @@
             sectorsList.editableList({
                 addItem: function(container, i, sector) {
                     //console.log(`Adding: ${JSON.stringify(sector)}`)
+                    let newAddition = false   // whether this is as a result of Add button being hit
                     if (!sector.hasOwnProperty("start")) {
+                        // this is a new needle
+                        newAddition = true
                         sector = {start: "", color: ""}
                         if (i === 0) {
                             sector.start = Math.min(Number($("#node-input-min").val()), Number($("#node-input-max").val())) || "0"
@@ -204,6 +203,10 @@
                     }).appendTo(row)
                     colorField.val(sector.color)
 
+                    // if this is a new row then validate everything
+                    if (newAddition) {
+
+                    }
                 },
 
                 sortable: true,
@@ -225,7 +228,9 @@
             let needlesList = $("#node-input-needles-container")
             needlesList.editableList({
                 addItem: function(container, i, needle) {
+                    let newAddition = false   // whether this is as a result of Add button being hit
                     if (!needle.hasOwnProperty("topic")) {
+                        newAddition = true
                         needle = {color: "", lengthPercent: 100, topic: "", }
                     }
                     let row =  $('<div/>', {
@@ -264,6 +269,11 @@
                         validateNeedles(needlesList)
                     });
 
+                    if (newAddition) {
+                        // this is a new row being added so validate the set - shouldn't need to do this as it should be handled by resize
+                        validateNeedles(needlesList)
+                    }
+
                 },
 
                 sortable: true,
@@ -276,7 +286,18 @@
                     )
                 ),
 
-                addButton: 'add needle'
+                addButton: 'add needle',
+
+                resize: function() {
+                    // called when number of rows is changed - but it doesn't seem to work properly
+                    console.log("Needles list resize")
+                    validateNeedles(needlesList)
+                },
+
+                removeItem: function(data) {
+                    // called when an item is deleted - shouldn't need to do this as it should be handled by resize
+                    validateNeedles(needlesList)
+                },
             })
 
             this.needles = this.needles || []
@@ -323,7 +344,6 @@
         let topics = []
         const topicFields = needlesList.find(".node-input-needle-topic-value")
         const fieldCount = topicFields.length
-        console.log(`field count ${fieldCount}`)
         topicFields.each(function() {
             validateTopicField(this, fieldCount)
         })
@@ -347,8 +367,6 @@
         const topicValue = topicField.value
         // topic must not be empty if more than one needle
         let valid = fieldCount === 1  ||  topicValue.trim().length > 0
-        console.log(`validateTopicField ${topicValue} count: ${fieldCount}`)
-        console.log(`valid: ${valid}`)
 
         // Show a red border around the field, when not valid
         if (!valid) {
