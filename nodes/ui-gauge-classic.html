@@ -84,8 +84,26 @@
             units: {value: "°C"},
             needles: {
                 value: [
-                    {"color":"black","lengthPercent":100, "topic":"",}
+                    {"color":"black","lengthPercent":"100", "topic":"",}
                 ],
+                validate:function(needles) {
+                    console.log(`validate needles: ${JSON.stringify(needles)}`)
+                    // Each length must be a +ve number and topic must be present unless only one needle
+                    let isValid = true
+                    needles.forEach((needle) => {
+                        console.log(`needle: ${JSON.stringify(needle)}`)
+                        console.log(`num: ${RED.validators.number()(needle.lengthPercent)} val: ${Number(needle.lengthPercent)>0}`)
+                        isValid &&= (RED.validators.number()(needle.lengthPercent) && Number(needle.lengthPercent) > 0)
+                        console.log(`isValid a: ${isValid}`)
+                        // if more than one needle then all must have topics
+                        if (needles.length > 1) {
+                            // checks for non-empty topic
+                            isValid &&= needle.topic.trim().length > 0
+                            console.log(`isValid b: ${isValid}`)
+                        }
+                    })
+                    return isValid
+                },
             },
             sweep_angle: {
                 value: 250,
@@ -220,22 +238,32 @@
                         style: 'margin-left: 5px; margin-bottom: 0;',
                         class: 'node-input-needle-color-value'
                     }).appendTo(row)
+                    colorField.val(needle.color)
 
                     let lengthField = $('<input/>', {
                         type: 'text',
                         style: 'margin-left: 5px; margin-bottom: 0;',
                         class: 'node-input-needle-length-value'
                     }).appendTo(row)
+                    lengthField.val(needle.lengthPercent)
+                    // watch for changes on the length field
+                    lengthField.on("change keyup paste", function() {
+                        // validate this length field
+                        validateLengthField(this)
+                    });
 
                     let topicField = $('<input/>', {
                         type: 'text',
                         style: 'margin-left: 5px; margin-bottom: 0;',
                         class: 'node-input-needle-topic-value'
                     }).appendTo(row)
-
-                    colorField.val(needle.color)
-                    lengthField.val(needle.lengthPercent)
                     topicField.val(needle.topic)
+                    // watch for changes on the topic field
+                    topicField.on("change keyup paste", function() {
+                        // have to validate the full set of topics so just do everything
+                        validateNeedles(needlesList)
+                    });
+
                 },
 
                 sortable: true,
@@ -254,6 +282,8 @@
             this.needles = this.needles || []
             //console.log(`About to add items: ${JSON.stringify(this.needles)}`)
             needlesList.editableList('addItems', this.needles)
+            // show red boxes for any invalid fields
+            validateNeedles(needlesList)
         },
         oneditsave: function() {
             let sectors = $("#node-input-sectors-container").editableList('items');
@@ -280,7 +310,54 @@
             //console.log(`oneditsave needles: ${JSON.stringify(node.needles)}`)
         },
     })
-   // });
+
+    function validateNeedles(needlesList) {
+        // given the needles list validates all fields, drawing red boxes as appropriate
+        // Find all length input fields
+        let lengths = []
+        needlesList.find(".node-input-needle-length-value").each(function() {
+            validateLengthField(this)
+        })
+
+        // Find all topic input fields
+        let topics = []
+        const topicFields = needlesList.find(".node-input-needle-topic-value")
+        const fieldCount = topicFields.length
+        console.log(`field count ${fieldCount}`)
+        topicFields.each(function() {
+            validateTopicField(this, fieldCount)
+        })
+    }
+
+    function validateLengthField(lengthField) {
+        const lengthValue = lengthField.value
+        //console.log(`validateLengthField ${lengthValue}`)
+        let valid = RED.validators.number()(lengthValue) && Number(lengthValue) > 0
+        //console.log(`valid: ${valid}`)
+
+        // Show a red border around the field, when not valid
+        if (!valid) {
+            $(lengthField).css('border', '1px solid rgb(214, 97, 95)');
+        }
+        else {
+            $(lengthField).css('border', '');
+        }
+    }
+    function validateTopicField(topicField, fieldCount) {
+        const topicValue = topicField.value
+        // topic must not be empty if more than one needle
+        let valid = fieldCount === 1  ||  topicValue.trim().length > 0
+        console.log(`validateTopicField ${topicValue} count: ${fieldCount}`)
+        console.log(`valid: ${valid}`)
+
+        // Show a red border around the field, when not valid
+        if (!valid) {
+            $(topicField).css('border', '1px solid rgb(214, 97, 95)');
+        }
+        else {
+            $(topicField).css('border', '');
+        }
+    }
 </script>
 
 <script type="text/html" data-template-name="ui-gauge-classic">
