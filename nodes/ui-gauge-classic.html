@@ -37,6 +37,19 @@
             },
             sectors: {
                 value: [],
+                validate:function(sectors) {
+                    //console.log(`validate sectors: ${JSON.stringify(sectors)}`)
+                    // Each start value must be a number and they must be increasing in value
+                    let isValid = true
+                    sectors.forEach((sector,index) => {
+                        isValid = isValid && RED.validators.number()(sector.start)
+                        // if not first one then should be greater than previous
+                        if (index>0) {
+                            isValid = isValid && sector.start > sectors[index-1].start
+                        }
+                    })
+                    return isValid
+                },
             },
             major_division: {
                 value: 1,
@@ -102,10 +115,11 @@
             let sectorsList = $("#node-input-sectors-container")
             sectorsList.editableList({
                 addItem: function(container, i, sector) {
+                    //console.log(`Adding: ${JSON.stringify(sector)}`)
                     if (!sector.hasOwnProperty("start")) {
                         sector = {start: "", color: ""}
                         if (i === 0) {
-                            sector.start = Math.min(Number($("#node-input-min").val()), Number($("#node-input-max").val())) || 0
+                            sector.start = Math.min(Number($("#node-input-min").val()), Number($("#node-input-max").val())) || "0"
                         }
                     }
                     let row =  $('<div/>', {
@@ -113,20 +127,65 @@
                         style: 'display: flex; margin-bottom: 0;'
                     }).appendTo(container)
 
+                    // Add the sector start field
                     let startField = $('<input/>', {
                         type: 'text',
+                        name: i,    // save the index in the name field so we can identify the field later
+                        required: true,
                         style: 'margin-left: 5px; margin-bottom: 0;',
                         class: 'node-input-sector-start-value'
                     }).appendTo(row)
+                    startField.val(sector.start)
 
+                    // watch for changes on the start field
+                    startField.on("change keyup paste", function() {
+                        // pick up the new value and index
+                        const startValue = this.value;
+                        const thisIndex = Number(this.name)
+                        //console.log(`startval: ${startValue}, index: ${thisIndex}`)
+
+                        // Validate the value
+                        let valid = true
+                        // check it is a number
+                        if (!RED.validators.number()(startValue)) {
+                            //console.log(`not number`)
+                            valid = false
+                        } else {
+                            // Find all start input fields
+                            let values = []
+                            sectorsList.find(".node-input-sector-start-value").each(function() {
+                                values.push(Number(this.value))
+                            })
+                            //console.log(`values: ${JSON.stringify(values)}`)
+                            // if it is not the first one then the value should be greater than the previous
+                            if (thisIndex > 0  &&  Number(this.value) <= values[thisIndex-1]) {
+                                valid = false
+                            } else {
+                                // if this is not the last one then it should be less than the next one
+                                if (thisIndex < values.length-1  &&  Number(startValue) >= values[thisIndex+1])
+                                {
+                                    valid = false
+                                }
+                            }
+                        }
+
+                        // Show a red border around the field, when not valid
+                        if (!valid) {
+                            $(this).css('border', '1px solid rgb(214, 97, 95)');
+                        }
+                        else {
+                            $(this).css('border', '');
+                        }
+                    });
+
+                    // Add the sector color field
                     let colorField = $('<input/>', {
                         type: 'text',
                         style: 'margin-left: 5px; margin-bottom: 0;',
                         class: 'node-input-sector-color-value'
                     }).appendTo(row)
-
-                    startField.val(sector.start)
                     colorField.val(sector.color)
+
                 },
 
                 sortable: true,
@@ -202,11 +261,10 @@
             node.sectors = [];
             sectors.each(function(i) {
                 node.sectors.push({
-                    start: Number($(this).find('.node-input-sector-start-value').val()),
+                    start: $(this).find('.node-input-sector-start-value').val(),
                     color: $(this).find('.node-input-sector-color-value').val()
                 })
             });
-
             //console.log(`oneditsave sectors: ${JSON.stringify(node.sectors)}`)
 
             let needles = $("#node-input-needles-container").editableList('items');
@@ -219,7 +277,6 @@
                     lengthPercent: $(this).find('.node-input-needle-length-value').val()
                 })
             });
-
             //console.log(`oneditsave needles: ${JSON.stringify(node.needles)}`)
         },
     })
