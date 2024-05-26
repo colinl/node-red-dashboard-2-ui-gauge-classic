@@ -1,6 +1,6 @@
 {
     "name": "@colinl/node-red-dashboard-2-ui-gauge-classic",
-    "version": "0.0.6",
+    "version": "0.0.7-beta",
     "description": "A classic style gauge node for @flowfuse/node-red-dashboard",
     "keywords": [
         "node-red",
@@ -58,7 +58,7 @@
         "vite-plugin-css-injected-by-js": "^3.3.0"
     },
     "engines": {
-        "node": ">=18"
+        "node": ">=16"
     },
     "node-red": {
         "version": ">=3.0.0",

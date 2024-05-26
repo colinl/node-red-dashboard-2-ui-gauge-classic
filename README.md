@@ -37,10 +37,13 @@ For a gauge with multiple needles, each will be configured with an associated to
 
 Display elements my be overriden in the normal way using a ui-template node.  In particular:
 
-* **Needle Rotation transition time** - The default transition for needle rotation is 0.5 seconds, which gives a realistic impression of needle movement.  If, however, the gauge is being updated rapidly, for example at 10 times a second, then it is desirable to reduce this.  This can be achieved by setting a class on the gauge, such as `myclass` then in a ui-template node in CSS mode specify something like
+**Needle Rotation transition time** - The default transition for needle rotation is 0.5 seconds, which gives a realistic impression of needle movement.  If, however, the gauge is being updated rapidly, for example at 10 times a second, then it is desirable to reduce this.  This can be achieved by setting a class on the gauge, such as `myclass` then in a ui-template node in CSS mode specify something like
 ```
 .myclass .cl-gauge .o-needle{
     transition: 0.1s;
 }
 ```
 Which will cause the needles to transition in 0.1 seconds allowing them to track the input accurately.
+
+## Example gauge images
+
