@@ -47,3 +47,10 @@ Which will cause the needles to transition in 0.1 seconds allowing them to track
 
 ## Example gauge images
 
+![image](https://github.com/colinl/node-red-dashboard-2-ui-gauge-classic/assets/38307/a057f573-1a58-4892-b54c-fad35c7747ef)
+
+![image](https://github.com/colinl/node-red-dashboard-2-ui-gauge-classic/assets/38307/1793553c-0e1e-46fd-a847-06c955243be9)
+
+![image](https://github.com/colinl/node-red-dashboard-2-ui-gauge-classic/assets/38307/cd0bfeb9-dc2e-4e22-9279-7c5d0dac1c8c)
+
+
