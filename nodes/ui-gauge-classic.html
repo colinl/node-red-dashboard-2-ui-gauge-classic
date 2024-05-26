@@ -40,12 +40,15 @@
                 validate:function(sectors) {
                     //console.log(`validate sectors: ${JSON.stringify(sectors)}`)
                     // Each start value must be a number and they must be increasing in value
+                    //console.log(`validate sectors ${JSON.stringify(sectors)}`)
                     let isValid = true
                     sectors.forEach((sector,index) => {
                         isValid = isValid && RED.validators.number()(sector.start)
+                        //console.log(`A ${index} ${isValid}`)
                         // if not first one then should be greater than previous
                         if (index>0) {
-                            isValid = isValid && sector.start > sectors[index-1].start
+                            isValid = isValid && Number(sector.start) > Number(sectors[index-1].start)
+                            //console.log(`B ${index} ${isValid}`)
                         }
                     })
                     return isValid
@@ -89,13 +92,16 @@
                 validate:function(needles) {
                     //console.log(`validate needles: ${JSON.stringify(needles)}`)
                     // Each length must be a +ve number and topic must be present unless only one needle
+                    //console.log(`validate needles ${JSON.stringify(needles)}`)
                     let isValid = true
                     needles.forEach((needle) => {
                         isValid &&= (RED.validators.number()(needle.lengthPercent) && Number(needle.lengthPercent) > 0)
+                        //console.log(`A ${isValid}`)
                         // if more than one needle then all must have topics
                         if (needles.length > 1) {
                             // checks for non-empty topic
                             isValid &&= needle.topic.trim().length > 0
+                            //console.log(`B ${isValid}`)
                         }
                     })
                     return isValid

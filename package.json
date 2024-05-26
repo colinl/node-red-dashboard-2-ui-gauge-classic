@@ -1,7 +1,7 @@
 {
     "name": "@colinl/node-red-dashboard-2-ui-gauge-classic",
-    "version": "0.0.5",
-    "description": "A ui gauge node",
+    "version": "0.0.6",
+    "description": "A classic style gauge node for @flowfuse/node-red-dashboard",
     "keywords": [
         "node-red",
         "node-red-dashboard-2"
