@@ -5,7 +5,7 @@
         defaults: {
             name: { value: "" },
             group: { type: 'ui-group', required: true },
-            order: { value: 0 },
+            order: { value: 0 },    // the dashboard uses this for ordering widgets in group
             width: {
                 value: 0,
                 validate: function (v) {
@@ -19,7 +19,7 @@
             },
             height: { value: 0 },
             min: { 
-                value: 0, 
+                value: 0,       // range min (though may be set > max)
                 required: true,
                 validate:function(v) {
                     // must be a number and not the same as max
@@ -28,7 +28,7 @@
                 },
             },
             max: { 
-                value: 10,
+                value: 10,      // range max (though may be less than min)
                 validate:function(v) {
                     // must be a number and not the same as min
                     const min=Number($("#node-input-min").length ? $("#node-input-min").val() : this.min)
@@ -36,7 +36,7 @@
                 },
             },
             sectors: {
-                value: [],
+                value: [],      // array of coloured sectors around the scale
                 validate:function(sectors) {
                     //console.log(`validate sectors: ${JSON.stringify(sectors)}`)
                     // Each start value must be a number and they must be increasing in value
@@ -52,38 +52,38 @@
                 },
             },
             major_division: {
-                value: 1,
+                value: 1,       // size in scale units of a major (numbered) division on the scale
                 validate:function(v) {
                     // must be a number >0
                     return (RED.validators.number()(v) && Number(v) > 0)
                 },
             },
             minor_division: {
-                value: 0.2,
+                value: 0.2,     // size of minor division on the scale
                 validate:function(v) {
                     // must be a number >0
                     return (RED.validators.number()(v) && Number(v) > 0)
                 },
             },
             value_decimal_places: {
-                value: 1,
+                value: 1,       // number of decimal places shown for the value displayed in gauge
                 validate:function(v) {
                     // must be a number >=0
                     return (RED.validators.number()(v) && Number(v) >= 0)
                 },
             },
             scale_decimal_places: {
-                value: 0,
+                value: 0,       // number of decimal places in the major tick annotation
                 validate:function(v) {
                     // must be a number >=0
                     return (RED.validators.number()(v) && Number(v) >= 0)
                 },
             },
             label: {value: ""},
-            measurement: {value: ""},
+            measurement: {value: "temperature"},
             units: {value: "°C"},
             needles: {
-                value: [
+                value: [        // array of needle specs
                     {"color":"black","lengthPercent":"100", "topic":"",}
                 ],
                 validate:function(needles) {
@@ -102,7 +102,7 @@
                 },
             },
             sweep_angle: {
-                value: 250,
+                value: 250,     // the sweep angle of the scale
                 validate:function(v) {
                     // must be a number >0 and <360.
                     const num = Number(v)
@@ -132,7 +132,7 @@
                     //console.log(`Adding: ${JSON.stringify(sector)}`)
                     let newAddition = false   // whether this is as a result of Add button being hit
                     if (!sector.hasOwnProperty("start")) {
-                        // this is a new needle
+                        // this is a new sector
                         newAddition = true
                         sector = {start: "", color: ""}
                         if (i === 0) {
@@ -156,43 +156,8 @@
 
                     // watch for changes on the start field
                     startField.on("change keyup paste", function() {
-                        // pick up the new value and index
-                        const startValue = this.value;
-                        const thisIndex = Number(this.name)
-                        //console.log(`startval: ${startValue}, index: ${thisIndex}`)
-
-                        // Validate the value
-                        let valid = true
-                        // check it is a number
-                        if (!RED.validators.number()(startValue)) {
-                            //console.log(`not number`)
-                            valid = false
-                        } else {
-                            // Find all start input fields
-                            let values = []
-                            sectorsList.find(".node-input-sector-start-value").each(function() {
-                                values.push(Number(this.value))
-                            })
-                            //console.log(`values: ${JSON.stringify(values)}`)
-                            // if it is not the first one then the value should be greater than the previous
-                            if (thisIndex > 0  &&  Number(this.value) <= values[thisIndex-1]) {
-                                valid = false
-                            } else {
-                                // if this is not the last one then it should be less than the next one
-                                if (thisIndex < values.length-1  &&  Number(startValue) >= values[thisIndex+1])
-                                {
-                                    valid = false
-                                }
-                            }
-                        }
-
-                        // Show a red border around the field, when not valid
-                        if (!valid) {
-                            $(this).css('border', '1px solid rgb(214, 97, 95)');
-                        }
-                        else {
-                            $(this).css('border', '');
-                        }
+                        // validate the set of sectors
+                        validateSectors(sectorsList)
                     });
 
                     // Add the sector color field
@@ -205,7 +170,7 @@
 
                     // if this is a new row then validate everything
                     if (newAddition) {
-
+                        validateSectors(sectorsList)
                     }
                 },
 
@@ -219,11 +184,25 @@
                     )
                 ),
 
-                addButton: 'add sector'
+                addButton: 'add sector',
+
+                removeItem: function(data) {
+                    // called when an item is deleted. Need to renumber and revalidate as one which was invalid may now be valid
+                    renumberSectors(sectorsList)
+                    validateSectors(sectorsList)
+                },
+
+                sortItems: function(items) {
+                    // called when an item is moved, renumer and revalidate
+                    renumberSectors(sectorsList)
+                    validateSectors(sectorsList)
+                }
             })
             this.sectors = this.sectors || []
             //console.log(`About to add items: ${JSON.stringify(this.sectors)}`)
             sectorsList.editableList('addItems', this.sectors)
+            // show red boxes for any invalid fields
+            validateSectors(sectorsList)
 
             let needlesList = $("#node-input-needles-container")
             needlesList.editableList({
@@ -254,7 +233,7 @@
                     // watch for changes on the length field
                     lengthField.on("change keyup paste", function() {
                         // validate this length field
-                        validateLengthField(this)
+                        validateNeedleLengthField(this)
                     });
 
                     let topicField = $('<input/>', {
@@ -270,7 +249,7 @@
                     });
 
                     if (newAddition) {
-                        // this is a new row being added so validate the set - shouldn't need to do this as it should be handled by resize
+                        // this is a new row being added so validate the set
                         validateNeedles(needlesList)
                     }
 
@@ -288,14 +267,8 @@
 
                 addButton: 'add needle',
 
-                resize: function() {
-                    // called when number of rows is changed - but it doesn't seem to work properly
-                    console.log("Needles list resize")
-                    validateNeedles(needlesList)
-                },
-
                 removeItem: function(data) {
-                    // called when an item is deleted - shouldn't need to do this as it should be handled by resize
+                    // called when an item is deleted
                     validateNeedles(needlesList)
                 },
             })
@@ -335,9 +308,8 @@
     function validateNeedles(needlesList) {
         // given the needles list validates all fields, drawing red boxes as appropriate
         // Find all length input fields
-        let lengths = []
         needlesList.find(".node-input-needle-length-value").each(function() {
-            validateLengthField(this)
+            validateNeedleLengthField(this)
         })
 
         // Find all topic input fields
@@ -345,13 +317,13 @@
         const topicFields = needlesList.find(".node-input-needle-topic-value")
         const fieldCount = topicFields.length
         topicFields.each(function() {
-            validateTopicField(this, fieldCount)
+            validateNeedleTopicField(this, fieldCount)
         })
     }
 
-    function validateLengthField(lengthField) {
+    function validateNeedleLengthField(lengthField) {
         const lengthValue = lengthField.value
-        //console.log(`validateLengthField ${lengthValue}`)
+        //console.log(`validateNeedleLengthField ${lengthValue}`)
         let valid = RED.validators.number()(lengthValue) && Number(lengthValue) > 0
         //console.log(`valid: ${valid}`)
 
@@ -363,7 +335,7 @@
             $(lengthField).css('border', '');
         }
     }
-    function validateTopicField(topicField, fieldCount) {
+    function validateNeedleTopicField(topicField, fieldCount) {
         const topicValue = topicField.value
         // topic must not be empty if more than one needle
         let valid = fieldCount === 1  ||  topicValue.trim().length > 0
@@ -374,6 +346,67 @@
         }
         else {
             $(topicField).css('border', '');
+        }
+    }
+
+    function renumberSectors(sectorsList) {
+        // following a move or delete this re-orders the index attached to the start value
+        let index = 0
+        sectorsList.find(".node-input-sector-start-value").each(function() {
+            this.name = index++
+        })
+    }
+
+    function validateSectors(sectorsList) {
+        // given the sectors list validates all fields, drawing red boxes as appropriate
+        // Find all start value input fields
+        const startValueFields = sectorsList.find(".node-input-sector-start-value")
+        // get all the start values
+        let values = []
+        startValueFields.each(function() {
+            values.push(Number(this.value))
+        })
+        //console.log(`validateSectors values: ${values}`)
+        // now validate each field using the ones around it
+        startValueFields.each(function() {
+            validateSectorStartField(this, values)
+        })
+    }
+
+    function validateSectorStartField(startField, values) {
+        // startField is a reference to the individual sector start field to be validated
+        // values is an array of numbers being the set of start values for all sectors
+        // pick up the start value and index
+        const startValue = startField.value;
+        const thisIndex = Number(startField.name)
+        //console.log(`validateSectorStartField startValue: ${startValue}, index: ${thisIndex}`)
+
+        let valid = true
+
+        // check it is a number
+        if (!RED.validators.number()(startValue)) {
+            //console.log(`not number`)
+            valid = false
+        } else {
+            // if it is not the first one then the value should be greater than the previous
+            if (thisIndex > 0  &&  Number(startValue) <= values[thisIndex-1]) {
+                //console.log(`a`)
+                valid = false
+            } else {
+                // if this is not the last one then it should be less than the next one
+                if (thisIndex < values.length-1  &&  Number(startValue) >= values[thisIndex+1])
+                {
+                    //console.log(`b`)
+                    valid = false
+                }
+            }
+        }
+        // Show a red border around the field, when not valid
+        if (!valid) {
+            $(startField).css('border', '1px solid rgb(214, 97, 95)');
+        }
+        else {
+            $(startField).css('border', '');
         }
     }
 </script>

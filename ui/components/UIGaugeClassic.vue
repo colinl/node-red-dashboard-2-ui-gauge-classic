@@ -33,7 +33,7 @@
 </template>
 
 <script>
-import { markRaw } from 'vue'
+//import { markRaw } from 'vue'
 import { mapState } from 'vuex'
 
 export default {

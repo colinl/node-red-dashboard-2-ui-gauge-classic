@@ -11,8 +11,8 @@
   }
 })();
 (function(global, factory) {
-  typeof exports === "object" && typeof module !== "undefined" ? factory(exports, require("vue"), require("vuex")) : typeof define === "function" && define.amd ? define(["exports", "vue", "vuex"], factory) : (global = typeof globalThis !== "undefined" ? globalThis : global || self, factory(global["ui-gauge-classic"] = {}, global.Vue, global.vuex));
-})(this, function(exports2, vue, vuex) {
+  typeof exports === "object" && typeof module !== "undefined" ? factory(exports, require("vuex"), require("vue")) : typeof define === "function" && define.amd ? define(["exports", "vuex", "vue"], factory) : (global = typeof globalThis !== "undefined" ? globalThis : global || self, factory(global["ui-gauge-classic"] = {}, global.vuex, global.Vue));
+})(this, function(exports2, vuex, vue) {
   "use strict";
   const _export_sfc = (sfc, props) => {
     const target = sfc.__vccOpts || sfc;
