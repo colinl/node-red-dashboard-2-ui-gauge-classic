@@ -47,6 +47,8 @@ Which will cause the needles to transition in 0.1 seconds allowing them to track
 
 ## Example gauge images
 
+Below are images from the included example flows, which can be downloaded by going to Import, selecting Examples, then this node.
+
 ![image](https://github.com/colinl/node-red-dashboard-2-ui-gauge-classic/assets/38307/a057f573-1a58-4892-b54c-fad35c7747ef)
 
 ![image](https://github.com/colinl/node-red-dashboard-2-ui-gauge-classic/assets/38307/1793553c-0e1e-46fd-a847-06c955243be9)

@@ -142,10 +142,12 @@ export default {
             //console.log(`On widget-load ${JSON.stringify(msg)}`)
             //console.log(`sectors: ${JSON.stringify(this.sectors)}`)
             this.processMsg(msg)     // pick up message values
+        /*
             this.$store.commit('data/bind', {
                 widgetId: this.id,
                 msg
             })
+        */
         })
         this.$socket.on('msg-input:' + this.id, (msg) => {
             //console.log(`Message received: ${JSON.stringify(msg)}`)
@@ -159,7 +161,7 @@ export default {
             })
         })
 
-        //console.log(`props: ${JSON.stringify(this.props)}`)
+        //console.log(`mounted, props: ${JSON.stringify(this.props)}`)
         // pickup node properties to local data
         this.pickupProperties()
         // initialise needle positions
@@ -274,7 +276,7 @@ export default {
             //console.log(`processMessage, $refs: ${JSON.stringify(this.$refs)}`)
             if (msg.needles) {
                 this.needles.forEach((needle, index) => {
-                    const v = this.validate(msg.needles[index].value)       // this copes with undefined value
+                    const v = this.validate(msg.needles[index]?.value)       // this copes with undefined value
                     // the value displayed is from the first needle
                     if (index === 0) {
                         // value displayed is for the first needle

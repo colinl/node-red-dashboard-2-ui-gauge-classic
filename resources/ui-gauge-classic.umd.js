@@ -120,10 +120,6 @@
     mounted() {
       this.$socket.on("widget-load:" + this.id, (msg) => {
         this.processMsg(msg);
-        this.$store.commit("data/bind", {
-          widgetId: this.id,
-          msg
-        });
       });
       this.$socket.on("msg-input:" + this.id, (msg) => {
         this.processMsg(msg);
@@ -221,7 +217,8 @@
       processMsg: function(msg) {
         if (msg.needles) {
           this.needles.forEach((needle, index) => {
-            const v = this.validate(msg.needles[index].value);
+            var _a;
+            const v = this.validate((_a = msg.needles[index]) == null ? void 0 : _a.value);
             if (index === 0) {
               this.value = v;
             }

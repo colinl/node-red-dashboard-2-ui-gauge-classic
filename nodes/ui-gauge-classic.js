@@ -10,6 +10,10 @@ module.exports = function (RED) {
 
         const base = group.getBase()
 
+        // clear the server side data store, this ensures it is cleared if the node is deployed
+        //console.log(`clearing server data store`)
+        base.stores.data.save(base, node.id, {})
+
         let needles = config.needles
         //console.log(`needles: ${JSON.stringify(needles)}`)
 
@@ -28,7 +32,7 @@ module.exports = function (RED) {
                     if (needle) {
                         needle.value = msg.payload
                     } else {
-                        console.log(`msg with no matching needle topic ${msg.topic}`)
+                        console.log(`Classic gauge - msg with no matching needle topic ${msg.topic}`)
                     }
                 }
                 // add the needles into the message
