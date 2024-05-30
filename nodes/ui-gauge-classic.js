@@ -12,7 +12,7 @@ module.exports = function (RED) {
 
         // clear the server side data store, this ensures it is cleared if the node is deployed
         //console.log(`clearing server data store`)
-        base.stores.data.save(base, node, {});
+        base.stores.data.clear(node.id)
 
         let needles = config.needles
         //console.log(`needles: ${JSON.stringify(needles)}`)
