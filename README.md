@@ -45,6 +45,14 @@ Display elements my be overriden in the normal way using a ui-template node.  In
 ```
 Which will cause the needles to transition in 0.1 seconds allowing them to track the input accurately.
 
+**Needle Hub Colour** - The hub colour can be changed by specifying, for example
+```
+.myclass .cl-gauge .hub{
+    fill:red;
+}
+```
+Or leave off the `.myclass` to affect all gauges.
+
 ## Example gauge images
 
 Below are images from the included example flows, which can be downloaded by going to Import, selecting Examples, then this node.
