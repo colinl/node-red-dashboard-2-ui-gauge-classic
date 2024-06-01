@@ -9,8 +9,8 @@
                 <path v-for="(item, index) in sectors" :key="index" :ref="'sector-' + index" class="sector" stroke-width="5" 
                   :d="arcspec" :style="this.sectorStrokeStyles[index]" ></path>
 
-                <path class="tick-minor" stroke-width="5" :d="arcspec" :style="tickStyle(this.minorDivision, 0.5)"></path>
-                <path ref="arc" class="tick-major" stroke-width="5" :d="arcspec" :style="tickStyle(this.majorDivision, 1)"></path>
+                <path class="tick-minor" stroke-width="5" :d="arcspec" :style="this.minorTickStyle"></path>
+                <path ref="arc" class="tick-major" stroke-width="5" :d="arcspec" :style="this.majorTickStyle"></path>
 
                 <text v-for="(item, index) in numbers" :key="index" class="num" text-anchor="middle" :y="`${10.5-this.arc.radius}`" 
                   :style="`rotate: ${item.r}deg; transform-origin: ${this.arc.cx}% ${this.arc.cy/this.widgetSizeRatio}%; transform: translate(${this.arc.cx}%, ${this.arc.cy/widgetSizeRatio}%)`">
@@ -99,6 +99,8 @@ export default {
             unitsTextY: 0,
             valueTextY: 0,
             sectorStrokeStyles: [],     // pre-calculated stroke styles for the sectors
+            majorTickStyle: "",
+            minorTickStyle: "",
         }
     },
     computed: {
@@ -277,7 +279,9 @@ export default {
             this.sectors.forEach((sector, i) => {
                 this.sectorStrokeStyles[i] = this.calcStrokeStyle(i)
             })
-            console.log(`sectorStrokeStyles: ${JSON.stringify(this.sectorStrokeStyles)}`)
+            // precalculate tick styles
+            this.minorTickStyle = this.calcTickStyle(this.minorDivision, 0.5)
+            this.majorTickStyle = this.calcTickStyle(this.majorDivision, 1)
         },
         processMsg: function(msg) {
             // The message fed in is processed in ui-gauge-classic.js and needle values are joined into msg.needles
@@ -365,9 +369,10 @@ export default {
             }
             return `${this.range(v,params,false)}deg`
         },
-        tickStyle: function(division, width) {
+        calcTickStyle: function(division, width) {
             // division is the number of input units per tick
             // width is the width (length?) of the tick in svg units
+            console.log(`calcTickStyle`)
 
             // total arc length in svg units
             const arcLength = this.arc.arcLength
