@@ -21,9 +21,9 @@
                 <text class="units" :y="`${this.unitsTextY}`" x="50%" text-anchor="middle">{{units}}</text>
                 <text class="value" :y="`${this.valueTextY}`" x="50%" text-anchor="middle">{{formattedValue}}</text>
             </g>
-            <g v-for="(item, index) in needles" :ref="'o-needle-'+index" class="o-needle" 
-              :style="`transform-box: fill-box; transform-origin: 50% 100%; rotate: ${item.rotation};`"
-              v-html="needle(needles[index].lengthPercent,needles[index].color)">
+            <g v-for="(needle, index) in needles" :ref="'o-needle-'+index" class="o-needle" 
+              :style="`transform-box: fill-box; transform-origin: 50% 100%; rotate: ${needle.rotation};`"
+              v-html="needle.path">
             </g>
             <g>
                 <circle class="hub" :cx="`${this.arc.cx}`" :cy="`${this.arc.cy}`" r="3"></circle>
@@ -115,7 +115,6 @@ export default {
             return `grid-row-end: span ${rowSpan};`
         },
         arcspec: function() {
-            console.log(`arcspec`)
             const delta = this.arc.endDegrees - this.arc.startDegrees
             // if more than 180 deg sweep then large-arg-flag should be 1
             const largeArcFlag = delta > 180  ?  1  :  0
@@ -135,7 +134,7 @@ export default {
                 y = 100
             }
             const answer = `0 0 100 ${y}`
-            console.log(`theViewBox: ${answer}, height: ${this.props.height}, width: ${this.props.width}`)
+            //console.log(`theViewBox: ${answer}, height: ${this.props.height}, width: ${this.props.width}`)
             return answer
         },
     },
@@ -204,7 +203,6 @@ export default {
             this.calculateDerivedValues()
         },
         calcStrokeStyle: function(i) {
-            console.log(`calcStrokeStyle`)
             // returns the css style for sector[i]
             const sector = this.sectors[i]
             const params = {minIn: this.min, maxIn: this.max, minOut:0, maxOut: this.arc.arcLength}
@@ -282,6 +280,10 @@ export default {
             // precalculate tick styles
             this.minorTickStyle = this.calcTickStyle(this.minorDivision, 0.5)
             this.majorTickStyle = this.calcTickStyle(this.majorDivision, 1)
+            // precalculate needle paths
+            this.needles.forEach(needle => {
+                needle.path = this.calcNeedlePath(needle.lengthPercent,needle.color)
+            })
         },
         processMsg: function(msg) {
             // The message fed in is processed in ui-gauge-classic.js and needle values are joined into msg.needles
@@ -372,7 +374,6 @@ export default {
         calcTickStyle: function(division, width) {
             // division is the number of input units per tick
             // width is the width (length?) of the tick in svg units
-            console.log(`calcTickStyle`)
 
             // total arc length in svg units
             const arcLength = this.arc.arcLength
@@ -383,7 +384,7 @@ export default {
             // stroke-dashoffset sets the first tick to half width
             return `stroke-dasharray: ${width} ${tickPeriod-width}; stroke-dashoffset: ${width/2};`
         },
-        needle: function(lengthPercent, color) {
+        calcNeedlePath: function(lengthPercent, color) {
             const cx = this.arc.cx
             const cy = this.arc.cy
             const length = (this.arc.radius - 4.5) * lengthPercent/100
