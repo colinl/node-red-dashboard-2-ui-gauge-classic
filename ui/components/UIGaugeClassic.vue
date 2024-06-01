@@ -7,7 +7,7 @@
         <svg class="cl-gauge" ref="cl-gauge" width="100%" height="100%" :view-box.camel="theViewBox" :style="`--dash: ${this.arc.arcLength};`">
             <g>
                 <path v-for="(item, index) in sectors" :key="index" :ref="'sector-' + index" class="sector" stroke-width="5" 
-                  :d="arcspec" :style="strokeStyle(index)" ></path>
+                  :d="arcspec" :style="this.sectorStrokeStyles[index]" ></path>
 
                 <path class="tick-minor" stroke-width="5" :d="arcspec" :style="tickStyle(this.minorDivision, 0.5)"></path>
                 <path ref="arc" class="tick-major" stroke-width="5" :d="arcspec" :style="tickStyle(this.majorDivision, 1)"></path>
@@ -98,6 +98,7 @@ export default {
             widgetSizeRatio: 1,
             unitsTextY: 0,
             valueTextY: 0,
+            sectorStrokeStyles: [],     // pre-calculated stroke styles for the sectors
         }
     },
     computed: {
@@ -112,6 +113,7 @@ export default {
             return `grid-row-end: span ${rowSpan};`
         },
         arcspec: function() {
+            console.log(`arcspec`)
             const delta = this.arc.endDegrees - this.arc.startDegrees
             // if more than 180 deg sweep then large-arg-flag should be 1
             const largeArcFlag = delta > 180  ?  1  :  0
@@ -131,7 +133,7 @@ export default {
                 y = 100
             }
             const answer = `0 0 100 ${y}`
-            //console.log(`theViewBox: ${answer}, height: ${this.props.height}, width: ${this.props.width}`)
+            console.log(`theViewBox: ${answer}, height: ${this.props.height}, width: ${this.props.width}`)
             return answer
         },
     },
@@ -199,7 +201,8 @@ export default {
 
             this.calculateDerivedValues()
         },
-        strokeStyle: function(i) {
+        calcStrokeStyle: function(i) {
+            console.log(`calcStrokeStyle`)
             // returns the css style for sector[i]
             const sector = this.sectors[i]
             const params = {minIn: this.min, maxIn: this.max, minOut:0, maxOut: this.arc.arcLength}
@@ -270,6 +273,11 @@ export default {
             }
             //console.log(`widgetSizeRatio: ${this.widgetSizeRatio}`)
 
+            // pre-calculate the styles for the sectors
+            this.sectors.forEach((sector, i) => {
+                this.sectorStrokeStyles[i] = this.calcStrokeStyle(i)
+            })
+            console.log(`sectorStrokeStyles: ${JSON.stringify(this.sectorStrokeStyles)}`)
         },
         processMsg: function(msg) {
             // The message fed in is processed in ui-gauge-classic.js and needle values are joined into msg.needles
