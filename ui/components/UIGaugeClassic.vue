@@ -150,7 +150,7 @@ export default {
         */
         })
         this.$socket.on('msg-input:' + this.id, (msg) => {
-            //console.log(`Message received: ${JSON.stringify(msg)}`)
+            console.log(`Message received: ${JSON.stringify(msg)}`)
             // new message received
             this.processMsg(msg)
 
@@ -161,7 +161,7 @@ export default {
             })
         })
 
-        //console.log(`mounted, props: ${JSON.stringify(this.props)}`)
+        console.log(`mounted, props: ${JSON.stringify(this.props)}`)
         // pickup node properties to local data
         this.pickupProperties()
         // initialise needle positions
@@ -220,14 +220,50 @@ export default {
         calculateDerivedValues: function() {
             // validates values and calculates derived values
 
-            const cyLow = 64            // y coord of centre when gauge positioned at bottom of widget
-            const cyHigh = 50           // y coord when chart at top of widget
-            const radius = 47.5         // the usual radius
+            // calculate radius and centre position
+            let viewportHeight = 100 * this.height/this.width       // svg units
+            if (isNaN(viewportHeight) || !viewportHeight) {
+                viewportHeight = 100
+            }
+            const heightForGauge = (this.label && this.label.length > 0)  ?  viewportHeight - 14  :  viewportHeight
+            console.log(`viewportHeight:  ${viewportHeight}`)
+            // ends of chart must be a bit inside the viewport
+            // calc height of centre above ends of arc for unit radius
+            let centreHeightAboveEnds = Math.cos((360-this.arc.sweepAngle) * Math.PI/360)
+            if (centreHeightAboveEnds <= 0) {
+                centreHeightAboveEnds = 0
+            }
+            console.log(`centreHeightAboveEnds: ${centreHeightAboveEnds}`)
+            // now we can calc the max radius of outside of scale that will fit in the space vertically
+            let maxRadius = viewportHeight / (1 + centreHeightAboveEnds)
+            // must not be > 50 as otherwise it won't fit in the width
+            maxRadius = Math.min( maxRadius, 50)
+            // also it must be less than available height - the hub radius
+            maxRadius = Math.min(maxRadius, viewportHeight-2) // in fact had to set this to 2 for some reason
+            console.log(`maxRadius: ${maxRadius}`)
+            // determine actual radius (which is in radial centre of scale)
+            this.arc.radius = maxRadius - 2.5
+            // and the centre
+            if (this.label && this.label.length > 0) {
+                this.arc.cy = maxRadius + 14
+            } else {
+                this.arc.cy = maxRadius
+            }
+            console.log(`radius: ${this.arc.radius}, cy: ${this.arc.cy}`)
+
+
+
+
+
+            //const cyLow = 64            // y coord of centre when gauge positioned at bottom of widget
+            //const cyHigh = 50           // y coord when chart at top of widget
+            //const radius = 47.5         // the usual radius
             // sanity checks - probably there should be more of these
             this.majorDivision = this.majorDivision <= 0  ?  1  : this.majorDivision
             this.minorDivision = this.minorDivision <= 0  ?  1  : this.minorDivision
             // position chart at top of widget if label is empty
-            this.arc.radius = radius
+            //this.arc.radius = radius
+            /*
             if (this.label && this.label.length > 0) {
                 this.arc.cy = cyLow
             } else {
@@ -238,7 +274,7 @@ export default {
                     this.arc.radius -= 2.0  // not quite sure why this is ok with -2 with cy at -2.5
                     this.arc.cy -= 2.5
                 }
-            }
+            }*/
             // position units and value text above or below centre dependent on whether measurement text is provided
             if (this.measurement && this.measurement.length > 0) {
                 this.unitsTextY = this.arc.cy + 11

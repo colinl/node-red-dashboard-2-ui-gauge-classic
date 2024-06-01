@@ -1,3 +1,465 @@
-(function(){"use strict";try{if(typeof document<"u"){var a=document.createElement("style");a.appendChild(document.createTextNode(".ui-gauge-cl-wrapper[data-v-f4a32aaf]{padding:10px;margin:10px;border:1px solid black}.ui-gauge-cl-class[data-v-f4a32aaf]{color:green;font-weight:700}.cl-gauge[data-v-f4a32aaf]{position:relative}.cl-gauge .label[data-v-f4a32aaf]{fill:currentColor;font-size:.5rem;dominant-baseline:hanging}.cl-gauge .value[data-v-f4a32aaf]{fill:currentColor}.cl-gauge .units[data-v-f4a32aaf]{fill:currentColor;font-size:.4rem}.cl-gauge .measurement[data-v-f4a32aaf]{fill:currentColor;font-size:.5rem}.cl-gauge .num[data-v-f4a32aaf]{fill:currentColor;fill-opacity:.6;font-size:.35rem}.cl-gauge .tick-minor[data-v-f4a32aaf]{fill:none;stroke:currentColor;stroke-opacity:.6}.cl-gauge .tick-major[data-v-f4a32aaf]{fill:none;stroke:currentColor}.cl-gauge .sector[data-v-f4a32aaf]{fill:none;stroke:transparent}.cl-gauge .o-needle[data-v-f4a32aaf]{transition:.5s}")),document.head.appendChild(a)}}catch(e){console.error("vite-plugin-css-injected-by-js",e)}})();
-(function(l,m){typeof exports=="object"&&typeof module<"u"?m(exports,require("vuex"),require("vue")):typeof define=="function"&&define.amd?define(["exports","vuex","vue"],m):(l=typeof globalThis<"u"?globalThis:l||self,m(l["ui-gauge-classic"]={},l.vuex,l.Vue))})(this,function(l,m,s){"use strict";const f=(t,e)=>{const r=t.__vccOpts||t;for(const[a,i]of e)r[a]=i;return r},y={name:"UIGaugeClassic",inject:["$socket"],props:{id:{type:String,required:!0},props:{type:Object,default:()=>({})},state:{type:Object,default:()=>({enabled:!1,visible:!1})}},setup(t){},data(){return{min:0,max:1,majorDivision:10,minorDivision:5,units:"",label:"",measurement:"",valueDecimalPlaces:2,scaleDecimalPlaces:1,width:4,height:4,sectors:[],arc:{cx:50,cy:64,radius:47.5,startDegrees:-123,endDegrees:123,sweepAngle:246,startx:10,starty:90,endx:90,endy:90,arcLength:100},class:"",value:null,needles:[],widgetSizeRatio:1,unitsTextY:0,valueTextY:0}},computed:{...m.mapState("data",["messages"]),wrapperStyle:function(){let t=this.props.height;return t||(t="null"),`grid-row-end: span ${t};`},arcspec:function(){const e=this.arc.endDegrees-this.arc.startDegrees>180?1:0;return`M ${this.arc.startx} ${this.arc.starty} A ${this.arc.radius} ${this.arc.radius} 0 ${e} 1 ${this.arc.endx} ${this.arc.endy}`},formattedValue:function(){return this.value!==null?this.value.toFixed(this.valueDecimalPlaces):"---"},numbers:function(){return this.generateNumbers(this.min,this.max,this.majorDivision)},theViewBox(){let t=100*this.props.height/this.props.width;return(isNaN(t)||!t)&&(t=100),`0 0 100 ${t}`}},mounted(){this.$socket.on("widget-load:"+this.id,t=>{this.processMsg(t)}),this.$socket.on("msg-input:"+this.id,t=>{this.processMsg(t),this.$store.commit("data/bind",{widgetId:this.id,msg:t})}),this.pickupProperties(),this.needles.forEach(t=>{t.rotation=this.rotation(null)}),this.$socket.emit("widget-load",this.id)},unmounted(){var t,e;(t=this.$socket)==null||t.off("widget-load"+this.id),(e=this.$socket)==null||e.off("msg-input:"+this.id)},methods:{pickupProperties:function(){const t=this.props;this.min=Number(t.min),this.max=Number(t.max),this.width=Number(t.width),this.height=Number(t.height),this.sectors=t.sectors,this.majorDivision=Number(t.major_division),this.minorDivision=Number(t.minor_division),this.valueDecimalPlaces=Number(t.value_decimal_places),this.scaleDecimalPlaces=Number(t.scale_decimal_places),this.label=t.label,this.units=t.units,this.measurement=t.measurement,this.needles=t.needles,this.arc.sweepAngle=t.sweep_angle||246,this.class=t.myclass,this.calculateDerivedValues()},strokeStyle:function(t){const e=this.sectors[t],r={minIn:this.min,maxIn:this.max,minOut:0,maxOut:this.arc.arcLength},a=this.range(e.start,r,!1);let i;t>=this.sectors.length-1?i=Math.max(this.max,this.min):i=this.sectors[t+1].start;const n=this.range(i,r,!1),o=Math.min(a,n),c=Math.max(a,n)-o;return`stroke-dasharray: 0 ${o} ${c} var(--dash); stroke: ${e.color};`},calculateDerivedValues:function(){this.majorDivision=this.majorDivision<=0?1:this.majorDivision,this.minorDivision=this.minorDivision<=0?1:this.minorDivision,this.arc.radius=47.5,this.label&&this.label.length>0?this.arc.cy=64:(this.arc.cy=50,this.height/this.width==.5&&(this.arc.radius-=2,this.arc.cy-=2.5)),this.measurement&&this.measurement.length>0?(this.unitsTextY=this.arc.cy+11,this.valueTextY=this.arc.cy+26):(this.unitsTextY=this.arc.cy-23,this.valueTextY=this.arc.cy-8),this.arc.sweepAngle&&(this.arc.sweepAngle=Math.min(360,this.arc.sweepAngle),this.arc.startDegrees=-this.arc.sweepAngle/2,this.arc.endDegrees=this.arc.sweepAngle/2);const a=this.arc.startDegrees*Math.PI/180,i=this.arc.endDegrees*Math.PI/180;this.arc.startx=this.arc.cx-this.arc.radius*Math.sin(a-Math.PI),this.arc.starty=this.arc.cy+this.arc.radius*Math.cos(a-Math.PI),this.arc.endx=this.arc.cx+this.arc.radius*Math.sin(Math.PI-i),this.arc.endy=this.arc.cy+this.arc.radius*Math.cos(Math.PI-i),this.arc.arcLength=2*Math.PI*this.arc.radius*(this.arc.endDegrees-this.arc.startDegrees)/360,this.widgetSizeRatio=this.height/this.width,(isNaN(this.widgetSizeRatio)||!this.widgetSizeRatio)&&(this.widgetSizeRatio=1)},processMsg:function(t){t.needles&&this.needles.forEach((e,r)=>{var i;const a=this.validate((i=t.needles[r])==null?void 0:i.value);r===0&&(this.value=a),e.rotation=this.rotation(a)})},validate:function(t){let e;return typeof t!="number"?(e=parseFloat(t),isNaN(e)&&(e=null)):e=t,e},range:function(t,e,r){return e.maxIn>e.minIn?(t=Math.min(t,e.maxIn),t=Math.max(t,e.minIn)):(t=Math.min(t,e.minIn),t=Math.max(t,e.maxIn)),r?Math.round((t-e.minIn)/(e.maxIn-e.minIn)*(e.maxOut-e.minOut)+e.minOut):(t-e.minIn)/(e.maxIn-e.minIn)*(e.maxOut-e.minOut)+e.minOut},generateNumbers:function(t,e,r){let a,i,n;e>t?(a=this.arc.startDegrees,i=this.arc.endDegrees,n=t):(a=this.arc.endDegrees,i=this.arc.startDegrees,n=e);const o=Math.floor(Math.abs(e-t)/r+.1),d=(i-a)*r/Math.abs(e-t);let u=[];for(let h=0;h<=o;h++){let g=h*d+a;const E=(n+h*r).toFixed(this.scaleDecimalPlaces);u.push({r:g,n:E})}return u},rotation:function(t){const e=this.height/this.width==.5?.02:.1,r=this.arc.endDegrees-this.arc.startDegrees,a=360-r,i=Math.min(e,a/2/r),n=(this.max-this.min)*i,o=r*i,c=this.min-n,d=this.max+n,u=this.arc.startDegrees-o,h=this.arc.endDegrees+o,g={minIn:c,maxIn:d,minOut:u,maxOut:h};return t===null&&(t=Math.min(c,d)),`${this.range(t,g,!1)}deg`},tickStyle:function(t,e){const r=this.arc.arcLength,a=Math.abs(this.max-this.min),i=t/a*r;return`stroke-dasharray: ${e} ${i-e}; stroke-dashoffset: ${e/2};`},needle:function(t,e){const r=this.arc.cx,a=this.arc.cy,i=(this.arc.radius-4.5)*t/100;return`<path d="M ${r},${a} ${r-1.5},${a} ${r-.15},${a-i} ${r+.15},${a-i} ${r+1.5},${a} z"
-                fill="${e}"></path>`}}},x=["viewBox"],p=["d"],D=["d"],w=["d"],_=["y"],k={class:"label",y:"0",x:"50%","text-anchor":"middle"},M=["y"],b=["y"],S=["y"],$=["innerHTML"],I=["cx","cy"];function N(t,e,r,a,i,n){return s.openBlock(),s.createElementBlock("div",{className:"ui-gauge-cl-wrapper",class:s.normalizeClass(i.class),style:s.normalizeStyle(n.wrapperStyle)},[(s.openBlock(),s.createElementBlock("svg",{class:"cl-gauge",ref:"cl-gauge",width:"100%",height:"100%",viewBox:n.theViewBox,style:s.normalizeStyle(`--dash: ${this.arc.arcLength};`)},[s.createElementVNode("g",null,[(s.openBlock(!0),s.createElementBlock(s.Fragment,null,s.renderList(i.sectors,(o,c)=>(s.openBlock(),s.createElementBlock("path",{key:c,ref_for:!0,ref:"sector-"+c,class:"sector","stroke-width":"5",d:n.arcspec,style:s.normalizeStyle(n.strokeStyle(c))},null,12,p))),128)),s.createElementVNode("path",{class:"tick-minor","stroke-width":"5",d:n.arcspec,style:s.normalizeStyle(n.tickStyle(this.minorDivision,.5))},null,12,D),s.createElementVNode("path",{ref:"arc",class:"tick-major","stroke-width":"5",d:n.arcspec,style:s.normalizeStyle(n.tickStyle(this.majorDivision,1))},null,12,w),(s.openBlock(!0),s.createElementBlock(s.Fragment,null,s.renderList(n.numbers,(o,c)=>(s.openBlock(),s.createElementBlock("text",{key:c,class:"num","text-anchor":"middle",y:`${10.5-this.arc.radius}`,style:s.normalizeStyle(`rotate: ${o.r}deg; transform-origin: ${this.arc.cx}% ${this.arc.cy/this.widgetSizeRatio}%; transform: translate(${this.arc.cx}%, ${this.arc.cy/i.widgetSizeRatio}%)`)},s.toDisplayString(o.n),13,_))),128)),s.createElementVNode("text",k,s.toDisplayString(i.label),1),s.createElementVNode("text",{class:"measurement",y:`${this.arc.cy-16}`,x:"50%","text-anchor":"middle"},s.toDisplayString(i.measurement),9,M),s.createElementVNode("text",{class:"units",y:`${this.unitsTextY}`,x:"50%","text-anchor":"middle"},s.toDisplayString(i.units),9,b),s.createElementVNode("text",{class:"value",y:`${this.valueTextY}`,x:"50%","text-anchor":"middle"},s.toDisplayString(n.formattedValue),9,S)]),(s.openBlock(!0),s.createElementBlock(s.Fragment,null,s.renderList(i.needles,(o,c)=>(s.openBlock(),s.createElementBlock("g",{ref_for:!0,ref:"o-needle-"+c,class:"o-needle",style:s.normalizeStyle(`transform-box: fill-box; transform-origin: 50% 100%; rotate: ${o.rotation};`),innerHTML:n.needle(i.needles[c].lengthPercent,i.needles[c].color)},null,12,$))),256)),s.createElementVNode("g",null,[s.createElementVNode("circle",{class:"hub",cx:`${this.arc.cx}`,cy:`${this.arc.cy}`,r:"3"},null,8,I)])],12,x))],6)}const B=f(y,[["render",N],["__scopeId","data-v-f4a32aaf"]]);l.UIGaugeClassic=B,Object.defineProperty(l,Symbol.toStringTag,{value:"Module"})});
+(function() {
+  "use strict";
+  try {
+    if (typeof document != "undefined") {
+      var elementStyle = document.createElement("style");
+      elementStyle.appendChild(document.createTextNode("/* CSS is auto scoped, but using named classes is still recommended */\n.ui-gauge-cl-wrapper[data-v-585800ff] {\n    padding: 10px;\n    margin: 10px;\n    border: 1px solid black;\n}\n.ui-gauge-cl-class[data-v-585800ff] {\n    color: green;\n    font-weight: bold;\n}\n.cl-gauge[data-v-585800ff]{\n    position:relative;\n}\n.cl-gauge .label[data-v-585800ff] {\n    fill:currentColor;\n    font-size:0.5rem;\n    dominant-baseline:hanging;\n}\n.cl-gauge .value[data-v-585800ff] {\n    fill:currentColor;\n}\n.cl-gauge .units[data-v-585800ff] {\n    fill:currentColor;\n    font-size:0.4rem;\n}\n.cl-gauge .measurement[data-v-585800ff] {\n    fill:currentColor;\n    font-size:0.5rem;\n}\n.cl-gauge .num[data-v-585800ff]{\n    fill:currentColor;\n    fill-opacity:0.6;\n    font-size:.35rem;\n}\n.cl-gauge .tick-minor[data-v-585800ff]{\n    fill:none;\n    stroke:currentColor;\n    stroke-opacity:0.6;\n}\n.cl-gauge .tick-major[data-v-585800ff]{\n    fill:none;\n    stroke:currentColor;\n}\n.cl-gauge .sector[data-v-585800ff]{\n    fill:none;\n    stroke:transparent;\n}\n.cl-gauge .o-needle[data-v-585800ff]{\n    transition:.5s;\n}"));
+      document.head.appendChild(elementStyle);
+    }
+  } catch (e) {
+    console.error("vite-plugin-css-injected-by-js", e);
+  }
+})();
+(function(global, factory) {
+  typeof exports === "object" && typeof module !== "undefined" ? factory(exports, require("vuex"), require("vue")) : typeof define === "function" && define.amd ? define(["exports", "vuex", "vue"], factory) : (global = typeof globalThis !== "undefined" ? globalThis : global || self, factory(global["ui-gauge-classic"] = {}, global.vuex, global.Vue));
+})(this, function(exports2, vuex, vue) {
+  "use strict";
+  const _export_sfc = (sfc, props) => {
+    const target = sfc.__vccOpts || sfc;
+    for (const [key, val] of props) {
+      target[key] = val;
+    }
+    return target;
+  };
+  const _sfc_main = {
+    name: "UIGaugeClassic",
+    inject: ["$socket"],
+    props: {
+      /* do not remove entries from this - Dashboard's Layout Manager's will pass this data to your component */
+      id: { type: String, required: true },
+      props: { type: Object, default: () => ({}) },
+      state: { type: Object, default: () => ({ enabled: false, visible: false }) }
+    },
+    setup(props) {
+    },
+    data() {
+      return {
+        // Min and max scale values.  Max may be less that min.
+        min: 0,
+        max: 1,
+        majorDivision: 10,
+        // number of input units for each (numbered) major division
+        minorDivision: 5,
+        // number of input units for each minor division
+        units: "",
+        label: "",
+        measurement: "",
+        valueDecimalPlaces: 2,
+        // number of decimal places to show in the value display
+        scaleDecimalPlaces: 1,
+        // number of decimal places to show on the scale
+        width: 4,
+        // widget width and height in dashboard units
+        height: 4,
+        // Coloured sectors around the scale.  Sectors can be in any order and it makes no difference if 
+        // start and end are reversed.
+        //  Any gaps are left at background colour
+        sectors: [],
+        // The position and alignment of the gauge inside the 100x100 svg box for the widget can be changed by modifying the settings below
+        // The origin of the svg box is the top left hand corner. The bottom right hand corner is 100,100
+        // Obviously, if you move the gauge you may have to move the text fields also.
+        // Take care with these settings, if you put silly values in the browser showing the dashboard may lock up. If this happens,
+        // close the dashboard browser tab (which may take some time as it is locked up).
+        arc: {
+          cx: 50,
+          // the x and y coordinates of the centre of the gauge arc
+          cy: 64,
+          radius: 47.5,
+          // the radius of the arc
+          startDegrees: -123,
+          // the angle of the start and end points of the arc.  Zero is vertically up from the centre
+          endDegrees: 123,
+          // +ve values are clockwise
+          sweepAngle: 246,
+          // derived values, values here are just to stop errors before first message received
+          startx: 10,
+          starty: 90,
+          endx: 90,
+          endy: 90,
+          arcLength: 100
+        },
+        class: "",
+        //don't change these
+        value: null,
+        needles: [],
+        // derived values
+        widgetSizeRatio: 1,
+        unitsTextY: 0,
+        valueTextY: 0
+      };
+    },
+    computed: {
+      ...vuex.mapState("data", ["messages"]),
+      wrapperStyle: function() {
+        let rowSpan = this.props.height;
+        if (!rowSpan) {
+          rowSpan = "null";
+        }
+        return `grid-row-end: span ${rowSpan};`;
+      },
+      arcspec: function() {
+        const delta = this.arc.endDegrees - this.arc.startDegrees;
+        const largeArcFlag = delta > 180 ? 1 : 0;
+        return `M ${this.arc.startx} ${this.arc.starty} A ${this.arc.radius} ${this.arc.radius} 0 ${largeArcFlag} 1 ${this.arc.endx} ${this.arc.endy}`;
+      },
+      formattedValue: function() {
+        return this.value !== null ? this.value.toFixed(this.valueDecimalPlaces) : "---";
+      },
+      numbers: function() {
+        return this.generateNumbers(this.min, this.max, this.majorDivision);
+      },
+      theViewBox() {
+        let y = 100 * this.props.height / this.props.width;
+        if (isNaN(y) || !y) {
+          y = 100;
+        }
+        const answer = `0 0 100 ${y}`;
+        return answer;
+      }
+    },
+    mounted() {
+      this.$socket.on("widget-load:" + this.id, (msg) => {
+        this.processMsg(msg);
+      });
+      this.$socket.on("msg-input:" + this.id, (msg) => {
+        console.log(`Message received: ${JSON.stringify(msg)}`);
+        this.processMsg(msg);
+        this.$store.commit("data/bind", {
+          widgetId: this.id,
+          msg
+        });
+      });
+      console.log(`mounted, props: ${JSON.stringify(this.props)}`);
+      this.pickupProperties();
+      this.needles.forEach((needle) => {
+        needle.rotation = this.rotation(null);
+      });
+      this.$socket.emit("widget-load", this.id);
+    },
+    unmounted() {
+      var _a, _b;
+      (_a = this.$socket) == null ? void 0 : _a.off("widget-load" + this.id);
+      (_b = this.$socket) == null ? void 0 : _b.off("msg-input:" + this.id);
+    },
+    methods: {
+      pickupProperties: function() {
+        const props = this.props;
+        this.min = Number(props.min);
+        this.max = Number(props.max);
+        this.width = Number(props.width);
+        this.height = Number(props.height);
+        this.sectors = props.sectors;
+        this.majorDivision = Number(props.major_division);
+        this.minorDivision = Number(props.minor_division);
+        this.valueDecimalPlaces = Number(props.value_decimal_places);
+        this.scaleDecimalPlaces = Number(props.scale_decimal_places);
+        this.label = props.label;
+        this.units = props.units;
+        this.measurement = props.measurement;
+        this.needles = props.needles;
+        this.arc.sweepAngle = props.sweep_angle || 246;
+        this.class = props.myclass;
+        this.calculateDerivedValues();
+      },
+      strokeStyle: function(i) {
+        const sector = this.sectors[i];
+        const params = { minIn: this.min, maxIn: this.max, minOut: 0, maxOut: this.arc.arcLength };
+        const start = this.range(sector.start, params, false);
+        let sectorEnd;
+        if (i >= this.sectors.length - 1) {
+          sectorEnd = Math.max(this.max, this.min);
+        } else {
+          sectorEnd = this.sectors[i + 1].start;
+        }
+        const end = this.range(sectorEnd, params, false);
+        const pos = Math.min(start, end);
+        const span = Math.max(start, end) - pos;
+        return `stroke-dasharray: 0 ${pos} ${span} var(--dash); stroke: ${sector.color};`;
+      },
+      calculateDerivedValues: function() {
+        let viewportHeight = 100 * this.height / this.width;
+        if (isNaN(viewportHeight) || !viewportHeight) {
+          viewportHeight = 100;
+        }
+        this.label && this.label.length > 0 ? viewportHeight - 14 : viewportHeight;
+        console.log(`viewportHeight:  ${viewportHeight}`);
+        let centreHeightAboveEnds = Math.cos((360 - this.arc.sweepAngle) * Math.PI / 360);
+        if (centreHeightAboveEnds <= 0) {
+          centreHeightAboveEnds = 0;
+        }
+        console.log(`centreHeightAboveEnds: ${centreHeightAboveEnds}`);
+        let maxRadius = viewportHeight / (1 + centreHeightAboveEnds);
+        maxRadius = Math.min(maxRadius, 50);
+        maxRadius = Math.min(maxRadius, viewportHeight - 2);
+        console.log(`maxRadius: ${maxRadius}`);
+        this.arc.radius = maxRadius - 2.5;
+        if (this.label && this.label.length > 0) {
+          this.arc.cy = maxRadius + 14;
+        } else {
+          this.arc.cy = maxRadius;
+        }
+        console.log(`radius: ${this.arc.radius}, cy: ${this.arc.cy}`);
+        this.majorDivision = this.majorDivision <= 0 ? 1 : this.majorDivision;
+        this.minorDivision = this.minorDivision <= 0 ? 1 : this.minorDivision;
+        if (this.measurement && this.measurement.length > 0) {
+          this.unitsTextY = this.arc.cy + 11;
+          this.valueTextY = this.arc.cy + 26;
+        } else {
+          this.unitsTextY = this.arc.cy - 23;
+          this.valueTextY = this.arc.cy - 8;
+        }
+        if (this.arc.sweepAngle) {
+          this.arc.sweepAngle = Math.min(360, this.arc.sweepAngle);
+          this.arc.startDegrees = -this.arc.sweepAngle / 2;
+          this.arc.endDegrees = this.arc.sweepAngle / 2;
+        }
+        const startRadians = this.arc.startDegrees * Math.PI / 180;
+        const endRadians = this.arc.endDegrees * Math.PI / 180;
+        this.arc.startx = this.arc.cx - this.arc.radius * Math.sin(startRadians - Math.PI);
+        this.arc.starty = this.arc.cy + this.arc.radius * Math.cos(startRadians - Math.PI);
+        this.arc.endx = this.arc.cx + this.arc.radius * Math.sin(Math.PI - endRadians);
+        this.arc.endy = this.arc.cy + this.arc.radius * Math.cos(Math.PI - endRadians);
+        this.arc.arcLength = 2 * Math.PI * this.arc.radius * (this.arc.endDegrees - this.arc.startDegrees) / 360;
+        this.widgetSizeRatio = this.height / this.width;
+        if (isNaN(this.widgetSizeRatio) || !this.widgetSizeRatio) {
+          this.widgetSizeRatio = 1;
+        }
+      },
+      processMsg: function(msg) {
+        if (msg.needles) {
+          this.needles.forEach((needle, index) => {
+            var _a;
+            const v = this.validate((_a = msg.needles[index]) == null ? void 0 : _a.value);
+            if (index === 0) {
+              this.value = v;
+            }
+            needle.rotation = this.rotation(v);
+          });
+        }
+      },
+      validate: function(data) {
+        let ret;
+        if (typeof data !== "number") {
+          ret = parseFloat(data);
+          if (isNaN(ret)) {
+            ret = null;
+          }
+        } else {
+          ret = data;
+        }
+        return ret;
+      },
+      range: function(n, p, r) {
+        if (p.maxIn > p.minIn) {
+          n = Math.min(n, p.maxIn);
+          n = Math.max(n, p.minIn);
+        } else {
+          n = Math.min(n, p.minIn);
+          n = Math.max(n, p.maxIn);
+        }
+        if (r) {
+          return Math.round((n - p.minIn) / (p.maxIn - p.minIn) * (p.maxOut - p.minOut) + p.minOut);
+        }
+        return (n - p.minIn) / (p.maxIn - p.minIn) * (p.maxOut - p.minOut) + p.minOut;
+      },
+      generateNumbers: function(min, max, majorDivision) {
+        let minDegrees, maxDegrees, startValue;
+        if (max > min) {
+          minDegrees = this.arc.startDegrees;
+          maxDegrees = this.arc.endDegrees;
+          startValue = min;
+        } else {
+          minDegrees = this.arc.endDegrees;
+          maxDegrees = this.arc.startDegrees;
+          startValue = max;
+        }
+        const numDivs = Math.floor(Math.abs(max - min) / majorDivision + 0.1);
+        const degRange = maxDegrees - minDegrees;
+        const degPerDiv = degRange * majorDivision / Math.abs(max - min);
+        let nums = [];
+        for (let div = 0; div <= numDivs; div++) {
+          let degrees = div * degPerDiv + minDegrees;
+          const n = (startValue + div * majorDivision).toFixed(this.scaleDecimalPlaces);
+          nums.push({ r: degrees, n });
+        }
+        return nums;
+      },
+      rotation: function(v) {
+        const factor = this.height / this.width == 0.5 ? 0.02 : 0.1;
+        const deltaDeg = this.arc.endDegrees - this.arc.startDegrees;
+        const gapDeg = 360 - deltaDeg;
+        const overflowFactor = Math.min(factor, gapDeg / 2 / deltaDeg);
+        const overflow = (this.max - this.min) * overflowFactor;
+        const angleOverflow = deltaDeg * overflowFactor;
+        const min = this.min - overflow;
+        const max = this.max + overflow;
+        const minAngle = this.arc.startDegrees - angleOverflow;
+        const maxAngle = this.arc.endDegrees + angleOverflow;
+        const params = { minIn: min, maxIn: max, minOut: minAngle, maxOut: maxAngle };
+        if (v === null) {
+          v = Math.min(min, max);
+        }
+        return `${this.range(v, params, false)}deg`;
+      },
+      tickStyle: function(division, width) {
+        const arcLength = this.arc.arcLength;
+        const range = Math.abs(this.max - this.min);
+        const tickPeriod = division / range * arcLength;
+        return `stroke-dasharray: ${width} ${tickPeriod - width}; stroke-dashoffset: ${width / 2};`;
+      },
+      needle: function(lengthPercent, color) {
+        const cx = this.arc.cx;
+        const cy = this.arc.cy;
+        const length = (this.arc.radius - 4.5) * lengthPercent / 100;
+        return `<path d="M ${cx},${cy} ${cx - 1.5},${cy} ${cx - 0.15},${cy - length} ${cx + 0.15},${cy - length} ${cx + 1.5},${cy} z"
+                fill="${color}"></path>`;
+      }
+    }
+  };
+  const _hoisted_1 = ["viewBox"];
+  const _hoisted_2 = ["d"];
+  const _hoisted_3 = ["d"];
+  const _hoisted_4 = ["d"];
+  const _hoisted_5 = ["y"];
+  const _hoisted_6 = {
+    class: "label",
+    y: "0",
+    x: "50%",
+    "text-anchor": "middle"
+  };
+  const _hoisted_7 = ["y"];
+  const _hoisted_8 = ["y"];
+  const _hoisted_9 = ["y"];
+  const _hoisted_10 = ["innerHTML"];
+  const _hoisted_11 = ["cx", "cy"];
+  function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
+    return vue.openBlock(), vue.createElementBlock(
+      vue.Fragment,
+      null,
+      [
+        vue.createCommentVNode(" Component must be wrapped in a block so props such as className and style can be passed in from parent "),
+        vue.createElementVNode(
+          "div",
+          {
+            className: "ui-gauge-cl-wrapper",
+            class: vue.normalizeClass($data.class),
+            style: vue.normalizeStyle($options.wrapperStyle)
+          },
+          [
+            (vue.openBlock(), vue.createElementBlock("svg", {
+              class: "cl-gauge",
+              ref: "cl-gauge",
+              width: "100%",
+              height: "100%",
+              viewBox: $options.theViewBox,
+              style: vue.normalizeStyle(`--dash: ${this.arc.arcLength};`)
+            }, [
+              vue.createElementVNode("g", null, [
+                (vue.openBlock(true), vue.createElementBlock(
+                  vue.Fragment,
+                  null,
+                  vue.renderList($data.sectors, (item, index) => {
+                    return vue.openBlock(), vue.createElementBlock("path", {
+                      key: index,
+                      ref_for: true,
+                      ref: "sector-" + index,
+                      class: "sector",
+                      "stroke-width": "5",
+                      d: $options.arcspec,
+                      style: vue.normalizeStyle($options.strokeStyle(index))
+                    }, null, 12, _hoisted_2);
+                  }),
+                  128
+                  /* KEYED_FRAGMENT */
+                )),
+                vue.createElementVNode("path", {
+                  class: "tick-minor",
+                  "stroke-width": "5",
+                  d: $options.arcspec,
+                  style: vue.normalizeStyle($options.tickStyle(this.minorDivision, 0.5))
+                }, null, 12, _hoisted_3),
+                vue.createElementVNode("path", {
+                  ref: "arc",
+                  class: "tick-major",
+                  "stroke-width": "5",
+                  d: $options.arcspec,
+                  style: vue.normalizeStyle($options.tickStyle(this.majorDivision, 1))
+                }, null, 12, _hoisted_4),
+                (vue.openBlock(true), vue.createElementBlock(
+                  vue.Fragment,
+                  null,
+                  vue.renderList($options.numbers, (item, index) => {
+                    return vue.openBlock(), vue.createElementBlock("text", {
+                      key: index,
+                      class: "num",
+                      "text-anchor": "middle",
+                      y: `${10.5 - this.arc.radius}`,
+                      style: vue.normalizeStyle(`rotate: ${item.r}deg; transform-origin: ${this.arc.cx}% ${this.arc.cy / this.widgetSizeRatio}%; transform: translate(${this.arc.cx}%, ${this.arc.cy / $data.widgetSizeRatio}%)`)
+                    }, vue.toDisplayString(item.n), 13, _hoisted_5);
+                  }),
+                  128
+                  /* KEYED_FRAGMENT */
+                )),
+                vue.createElementVNode(
+                  "text",
+                  _hoisted_6,
+                  vue.toDisplayString($data.label),
+                  1
+                  /* TEXT */
+                ),
+                vue.createElementVNode("text", {
+                  class: "measurement",
+                  y: `${this.arc.cy - 16}`,
+                  x: "50%",
+                  "text-anchor": "middle"
+                }, vue.toDisplayString($data.measurement), 9, _hoisted_7),
+                vue.createElementVNode("text", {
+                  class: "units",
+                  y: `${this.unitsTextY}`,
+                  x: "50%",
+                  "text-anchor": "middle"
+                }, vue.toDisplayString($data.units), 9, _hoisted_8),
+                vue.createElementVNode("text", {
+                  class: "value",
+                  y: `${this.valueTextY}`,
+                  x: "50%",
+                  "text-anchor": "middle"
+                }, vue.toDisplayString($options.formattedValue), 9, _hoisted_9)
+              ]),
+              (vue.openBlock(true), vue.createElementBlock(
+                vue.Fragment,
+                null,
+                vue.renderList($data.needles, (item, index) => {
+                  return vue.openBlock(), vue.createElementBlock("g", {
+                    ref_for: true,
+                    ref: "o-needle-" + index,
+                    class: "o-needle",
+                    style: vue.normalizeStyle(`transform-box: fill-box; transform-origin: 50% 100%; rotate: ${item.rotation};`),
+                    innerHTML: $options.needle($data.needles[index].lengthPercent, $data.needles[index].color)
+                  }, null, 12, _hoisted_10);
+                }),
+                256
+                /* UNKEYED_FRAGMENT */
+              )),
+              vue.createElementVNode("g", null, [
+                vue.createElementVNode("circle", {
+                  class: "hub",
+                  cx: `${this.arc.cx}`,
+                  cy: `${this.arc.cy}`,
+                  r: "3"
+                }, null, 8, _hoisted_11)
+              ])
+            ], 12, _hoisted_1))
+          ],
+          6
+          /* CLASS, STYLE */
+        )
+      ],
+      2112
+      /* STABLE_FRAGMENT, DEV_ROOT_FRAGMENT */
+    );
+  }
+  const UIGaugeClassic = /* @__PURE__ */ _export_sfc(_sfc_main, [["render", _sfc_render], ["__scopeId", "data-v-585800ff"], ["__file", "/home/colinl/nodes/node-red-dashboard-2-ui-gauge-classic/ui/components/UIGaugeClassic.vue"]]);
+  exports2.UIGaugeClassic = UIGaugeClassic;
+  Object.defineProperty(exports2, Symbol.toStringTag, { value: "Module" });
+});
