@@ -19,7 +19,7 @@
                 <text class="label" y="0" x="50%" text-anchor="middle">{{label}}</text>
                 <text class="measurement" :y="`${this.arc.cy-16}`" x="50%" text-anchor="middle">{{measurement}}</text>
                 <text class="units" :y="`${this.unitsTextY}`" x="50%" text-anchor="middle">{{units}}</text>
-                <text class="value" :y="`${this.valueTextY}`" x="50%" text-anchor="middle">{{formattedValue}}</text>
+                <text class="value" :y="`${this.valueTextY}`" x="50%" text-anchor="middle">{{displayValue}}</text>
             </g>
             <g v-for="(needle, index) in needles" :ref="'o-needle-'+index" class="o-needle" 
               :style="`transform-box: fill-box; transform-origin: 50% 100%; rotate: ${needle.rotation};`"
@@ -101,6 +101,7 @@ export default {
             sectorStrokeStyles: [],     // pre-calculated stroke styles for the sectors
             majorTickStyle: "",
             minorTickStyle: "",
+            formattedValue: null,       // formatted value from msg if provided
         }
     },
     computed: {
@@ -121,9 +122,12 @@ export default {
 
             return `M ${this.arc.startx} ${this.arc.starty} A ${this.arc.radius} ${this.arc.radius} 0 ${largeArcFlag} 1 ${this.arc.endx} ${this.arc.endy}`
         },
-        formattedValue: function() {
-            // Show --- for the value until a valid value is recevied
-            return this.value !== null  ?  this.value.toFixed(this.valueDecimalPlaces)  :  "---"
+        displayValue: function() {
+            // Shows --- for the value until a valid value is received, then shows msg.formattedValue if provided, 
+            // or the value from first needle
+            let value = this.formattedValue         // value from msg if provided
+            value ||= (this.value !== null  ?  this.value.toFixed(this.valueDecimalPlaces)  :  "---")
+            return value
         },
         numbers: function() {
             return this.generateNumbers(this.min,this.max,this.majorDivision)
@@ -242,13 +246,8 @@ export default {
                 }
             }
             // position units and value text above or below centre dependent on whether measurement text is provided
-            if (this.measurement && this.measurement.length > 0) {
-                this.unitsTextY = this.arc.cy + 11
-                this.valueTextY = this.arc.cy + 26
-            } else {
-                this.unitsTextY = this.arc.cy - 23
-                this.valueTextY = this.arc.cy - 8
-            }
+            this.calcTextPositions()
+
             // calculate start and end degrees from sweepAngle
             // check for undefined or 0, both are innapropriate
             if (this.arc.sweepAngle) {
@@ -306,9 +305,15 @@ export default {
             // check for dynamic settings for measurement and units, and pick them up
             if (msg.ui_update?.measurement  &&  typeof msg.ui_update.measurement === 'string') {
                 this.measurement = msg.ui_update.measurement
+                // position units and value text above or below centre dependent on whether measurement text is provided
+                this.calcTextPositions()
             }
             if (msg.ui_update?.units  &&  typeof msg.ui_update.units === 'string') {
                 this.units = msg.ui_update.units
+            }
+            // pick up formattedValue if present (checked to be string in js file)
+            if (msg.formattedValue) {
+                this.formattedValue = msg.formattedValue
             }
         },
         validate: function(data){
@@ -401,6 +406,17 @@ export default {
             this.sectors.forEach((sector, i) => {
                 this.sectorStrokeStyles[i] = this.calcStrokeStyle(i)
             })
+        },
+
+        calcTextPositions: function() {
+            // position units and value text above or below centre dependent on whether measurement text is provided
+            if (this.measurement && this.measurement.length > 0) {
+                this.unitsTextY = this.arc.cy + 11
+                this.valueTextY = this.arc.cy + 26
+            } else {
+                this.unitsTextY = this.arc.cy - 23
+                this.valueTextY = this.arc.cy - 8
+            }
         },
 
         calcNeedlePath: function(lengthPercent, color) {

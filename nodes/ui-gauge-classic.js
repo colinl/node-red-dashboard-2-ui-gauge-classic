@@ -18,6 +18,7 @@ module.exports = function (RED) {
         //console.log(`needles: ${JSON.stringify(needles)}`)
 
         let ui_update = null
+        let formattedValue = null
 
         // server-side event handlers
         const evts = {
@@ -51,10 +52,20 @@ module.exports = function (RED) {
                     // merge in data from this message
                     ui_update = {...ui_update, ...msg.ui_update}
                 }
+                // pick up msg.formattedValue if present and is a string
+                if (typeof msg.formattedValue === "string") {
+                    formattedValue = msg.formattedValue
+                }
+
                 // include joined ui_update in the message if it exists
                 if (ui_update) {
                     msg.ui_update = ui_update
                 }
+                // include joined formattedValue if present
+                if (formattedValue) {
+                    msg.formattedValue = formattedValue
+                }
+
                 // store the latest value in our Node-RED datastore
                 base.stores.data.save(base, node, msg)
                 // send it to any connected nodes in Node-RED
