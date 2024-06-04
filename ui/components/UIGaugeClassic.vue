@@ -143,7 +143,6 @@ export default {
             // load the latest message from the Node-RED datastore when this widget is loaded
             // storing it in our vuex store so that we have it saved as we navigate around
             //console.log(`On widget-load ${JSON.stringify(msg)}`)
-            //console.log(`sectors: ${JSON.stringify(this.sectors)}`)
             this.processMsg(msg)     // pick up message values
         /*
             this.$store.commit('data/bind', {
@@ -274,9 +273,8 @@ export default {
             //console.log(`widgetSizeRatio: ${this.widgetSizeRatio}`)
 
             // pre-calculate the styles for the sectors
-            this.sectors.forEach((sector, i) => {
-                this.sectorStrokeStyles[i] = this.calcStrokeStyle(i)
-            })
+            this.calcSectorStyles()
+
             // precalculate tick styles
             this.minorTickStyle = this.calcTickStyle(this.minorDivision, 0.5)
             this.majorTickStyle = this.calcTickStyle(this.majorDivision, 1)
@@ -298,6 +296,12 @@ export default {
                     }
                     needle.rotation = this.rotation(v)
                 })
+            }
+            if (Array.isArray(msg.ui_update?.sectors)) {
+                // a sectors array is included
+                this.sectors = msg.ui_update.sectors
+                // pre-calculate the styles for the sectors
+                this.calcSectorStyles()
             }
         },
         validate: function(data){
@@ -384,6 +388,14 @@ export default {
             // stroke-dashoffset sets the first tick to half width
             return `stroke-dasharray: ${width} ${tickPeriod-width}; stroke-dashoffset: ${width/2};`
         },
+
+        // Calculate the style css for all sectors
+        calcSectorStyles: function() {
+            this.sectors.forEach((sector, i) => {
+                this.sectorStrokeStyles[i] = this.calcStrokeStyle(i)
+            })
+        },
+
         calcNeedlePath: function(lengthPercent, color) {
             const cx = this.arc.cx
             const cy = this.arc.cy

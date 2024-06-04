@@ -491,6 +491,7 @@ A classic style multi-needle gauge for Node-RED Dashboard 2.0.
 : payload (number | string) :  The value to show on the gauge. If a string is passed in then it must represent a number.
 : *topic* (string)          :  For a gauge with a single needle the topic is ignored. For a gauge with multiple needles, the topic determines which needle to set.
 
+Certain configuration values can be overridden dynamically be passing in an object in `msg.ui_update`.  See Dynamic Properties below.  If both `msg.ui_update` and `msg.payload` are present then the message will both override the properties and provide a needle value.  To avoid this make sure that there is no `msg.payload` property in the message.  Once a property has been overridden it will stay at the new value unless a new value is provided via msg.ui_update.
 
 ### Configuration
 
@@ -507,6 +508,14 @@ A classic style multi-needle gauge for Node-RED Dashboard 2.0.
 * **Label** - A text label that is shown above the gauge.  If this is left empty then the gauge is moved up to the top, allowing more room for the scale.  If it is desired that no text is displayed but the scale is not moved up then enter a space character in this field.
 * **Measurement** - A string that is displayed inside the scale above the hub.  As described above, if this is left empty then the units and value will be moved up to take its place.  This is desirable if a 180° gauge is required, fitting into a 2:1 aspect ratio size on the dashboard (eg 2x1), where there is no room for the units and value fields below the hub.  If it is desired that no text is displayed but the units and value are not moved up then enter a space character in this field.
 * **Class** - A CSS Class that will be applied to the gauge to allow override of display element style.
+
+### Dynamic Properties
+
+Certain properties can be overridden by passing an object in `msg.ui_update`.  The name of the item in `msg.ui_update` is generally the name of the propety being overridden.  For example, the Sectors definitions may be changed by passing in array in `msg.ui_update.sectors`.  If `msg.payload` is also present then the payload will be interpreted as a needle value, as normal. Once a property has been overridden it will stay at the new value unless a new value is provided via msg.ui_update.
+Details of the dynamic properties available are as follows:
+
+* **Sectors** - If `msg.ui_update.sectors` contains an array then that will be used to override the current sector data.  The array must contain properties containing the sector start value and the colour.  It must be in order of increasing start value.  For example, the array might consist of
+`[{ "start": 0, "color": "green"}, { "start": 5, "color": "skyblue"}]`
 
 ### CSS overrides
 

@@ -17,26 +17,44 @@ module.exports = function (RED) {
         let needles = config.needles
         //console.log(`needles: ${JSON.stringify(needles)}`)
 
+        let ui_update = null
+
         // server-side event handlers
         const evts = {
             onAction: true,
             onInput: function (msg, send, done) {
-                // join the needle values from successive messages and add into the message
-                //console.log(`onInput, needles: ${JSON.stringify(needles)}`)
-                if (needles.length === 1) {
-                    // only one needle so ignore topic
-                    needles[0].value = msg.payload
-                } else {
-                    // find the needle with the matching topic
-                    const needle = needles.find((element) => element.topic === msg.topic);
-                    if (needle) {
-                        needle.value = msg.payload
+                // does msg.payload exist?
+                if (typeof msg.payload != "undefined") {
+                    // yes so update value from payload
+                    // join the needle values from successive messages and add into the message
+                    //console.log(`onInput, needles: ${JSON.stringify(needles)}`)
+                    if (needles.length === 1) {
+                        // only one needle so ignore topic
+                        needles[0].value = msg.payload
                     } else {
-                        console.log(`Classic gauge - msg with no matching needle topic ${msg.topic}`)
+                        // find the needle with the matching topic
+                        const needle = needles.find((element) => element.topic === msg.topic);
+                        if (needle) {
+                            needle.value = msg.payload
+                        } else {
+                            console.log(`Classic gauge - msg with no matching needle topic ${msg.topic}`)
+                        }
                     }
                 }
                 // add the needles into the message
                 msg.needles = needles
+
+                // does the msg.ui_control exist and is an object?
+                if (typeof msg.ui_control === 'object' && !Array.isArray(msg.ui_control) && msg.ui_control !== null) {
+                    // yes it does
+                    ui_update ??= {}    // initialise if necessary
+                    // merge in data from this message
+                    ui_update = {...ui_update, ...msg.ui_update}
+                }
+                // include joined ui_update in the message if it exists
+                if (ui_update) {
+                    msg.ui_update = ui_update
+                }
                 // store the latest value in our Node-RED datastore
                 base.stores.data.save(base, node, msg)
                 // send it to any connected nodes in Node-RED
