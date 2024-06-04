@@ -40,8 +40,10 @@ Certain configuration values can be overridden dynamically be passing in an obje
 Certain properties can be overridden by passing an object in `msg.ui_update`.  The name of the item in `msg.ui_update` is generally the name of the propety being overridden.  For example, the Sectors definitions may be changed by passing in array in `msg.ui_update.sectors`.  If `msg.payload` is also present then the payload will be interpreted as a needle value, as normal.  Once a property has been overridden it will stay at the new value unless a new value is provided via msg.ui_update.
 Details of the dynamic properties available are as follows:
 
-* **Sectors** - If `msg.ui_update.sectors` contains an array then that will be used to override the current sector data.  The array must contain properties containing the sector start value and the colour.  It must be in order of increasing start value.  For example, the array might consist of
+* **Sectors** - If `msg.ui_update.sectors` is present contains an array then that will be used to override the current sector data.  The array must contain properties containing the sector start value and the colour.  It must be in order of increasing start value.  For example, the array might consist of
 `[{ "start": 0, "color": "green"}, { "start": 5, "color": "skyblue"}]`
+* **Measurement** - If `msg.ui_update.measurement` is present and contains a string then that string will be displayed in the measurement field in the gauge.
+* **Units** - If `msg.ui_update.units` is present and contains a string then that string will be displayed in the units field in the gauge.
 
 ## CSS overrides
 

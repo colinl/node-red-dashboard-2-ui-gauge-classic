@@ -44,8 +44,8 @@ module.exports = function (RED) {
                 // add the needles into the message
                 msg.needles = needles
 
-                // does the msg.ui_control exist and is an object?
-                if (typeof msg.ui_control === 'object' && !Array.isArray(msg.ui_control) && msg.ui_control !== null) {
+                // does msg.ui_update exist and is an object?
+                if (typeof msg.ui_update === 'object' && !Array.isArray(msg.ui_update) && msg.ui_update !== null) {
                     // yes it does
                     ui_update ??= {}    // initialise if necessary
                     // merge in data from this message

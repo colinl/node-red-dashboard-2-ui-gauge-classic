@@ -303,6 +303,13 @@ export default {
                 // pre-calculate the styles for the sectors
                 this.calcSectorStyles()
             }
+            // check for dynamic settings for measurement and units, and pick them up
+            if (msg.ui_update?.measurement  &&  typeof msg.ui_update.measurement === 'string') {
+                this.measurement = msg.ui_update.measurement
+            }
+            if (msg.ui_update?.units  &&  typeof msg.ui_update.units === 'string') {
+                this.units = msg.ui_update.units
+            }
         },
         validate: function(data){
             let ret                

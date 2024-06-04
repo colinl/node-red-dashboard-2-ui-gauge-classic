@@ -516,6 +516,8 @@ Details of the dynamic properties available are as follows:
 
 * **Sectors** - If `msg.ui_update.sectors` contains an array then that will be used to override the current sector data.  The array must contain properties containing the sector start value and the colour.  It must be in order of increasing start value.  For example, the array might consist of
 `[{ "start": 0, "color": "green"}, { "start": 5, "color": "skyblue"}]`
+* **Measurement** - If `msg.ui_update.measurement` is present and contains a string then that string will be displayed in the measurement field in the gauge.
+* **Units** - If `msg.ui_update.units` is present and contains a string then that string will be displayed in the units field in the gauge.
 
 ### CSS overrides
 
