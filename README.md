@@ -71,10 +71,8 @@ Or leave off the `.myclass` to affect all gauges.
 
 Below are images from the included example flows, which can be downloaded by going to Import, selecting Examples, then this node.
 
-![image](https://github.com/colinl/node-red-dashboard-2-ui-gauge-classic/assets/38307/a057f573-1a58-4892-b54c-fad35c7747ef)
-
-![image](https://github.com/colinl/node-red-dashboard-2-ui-gauge-classic/assets/38307/1793553c-0e1e-46fd-a847-06c955243be9)
-
+![image](https://github.com/colinl/node-red-dashboard-2-ui-gauge-classic/assets/38307/1793553c-0e1e-46fd-a847-06c955243be9) 
+![image](https://github.com/colinl/node-red-dashboard-2-ui-gauge-classic/assets/38307/e1874da1-6cfe-47f0-9752-427b9a048ae3)
 ![image](https://github.com/colinl/node-red-dashboard-2-ui-gauge-classic/assets/38307/cd0bfeb9-dc2e-4e22-9279-7c5d0dac1c8c)
 
 ## Acknowledements
