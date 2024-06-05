@@ -490,6 +490,7 @@ A classic style multi-needle gauge for Node-RED Dashboard 2.0.
 
 : payload (number | string) :  The value to show on the gauge. If a string is passed in then it must represent a number.
 : *topic* (string)          :  For a gauge with a single needle the topic is ignored. For a gauge with multiple needles, the topic determines which needle to set.
+: *formattedValue* (string) :  By default, the value of the first needle is automatically displayed as text in the Gauge.  However, if a string is provided in `msg.formattedValue` then this will be shown instead.  This allows the user to format the value as desired.
 
 Certain configuration values can be overridden dynamically be passing in an object in `msg.ui_update`.  See Dynamic Properties below.  If both `msg.ui_update` and `msg.payload` are present then the message will both override the properties and provide a needle value.  To avoid this make sure that there is no `msg.payload` property in the message.  Once a property has been overridden it will stay at the new value unless a new value is provided via msg.ui_update.
 
