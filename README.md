@@ -17,6 +17,8 @@ For a gauge configured to have a single needle, pass in the value in `msg.payloa
 
 For a gauge with multiple needles, each will be configured with an associated topic value.  To pass in a value set `msg.topic` to select the needle, and put the value in msg.payload.
 
+By default, the value of the first needle is automatically displayed as text in the Gauge.  However, if a string is provided in `msg.formattedValue` then this will be shown instead.  This allows the user to format the value as desired.
+
 Certain configuration values can be overridden dynamically be passing in an object in `msg.ui_update`.  See Dynamic Properties below.  If both `msg.ui_update` and `msg.payload` are present then the message will both override the properties and provide a needle value.  To avoid this make sure that there is no `msg.payload` property in the message.  Once a property has been overridden it will stay at the new value unless a new value is provided via msg.ui_update.
 
 ## Configuration
