@@ -10,31 +10,27 @@ module.exports = function (RED) {
 
         const base = group.getBase()
 
-        // clear the server side data store, this ensures it is cleared if the node is deployed
-        //console.log(`clearing server data store`)
-        base.stores.data.clear(node.id)
-
-        let needles = config.needles
-        //console.log(`needles: ${JSON.stringify(needles)}`)
-
-        let ui_update = null
-        let formattedValue = null
+        // initialise data store on startup or deploy
+        base.stores.data.save(base, node, {needles: config.needles})
 
         // server-side event handlers
         const evts = {
             onAction: true,
             onInput: function (msg, send, done) {
+                // pick up existing stored data
+                let storedData = base.stores.data.get(node.id)
+                console.log(`onInput storedData: ${JSON.stringify(storedData)}\n\n`)
+
                 // does msg.payload exist?
                 if (typeof msg.payload != "undefined") {
                     // yes so update value from payload
-                    // join the needle values from successive messages and add into the message
                     //console.log(`onInput, needles: ${JSON.stringify(needles)}`)
-                    if (needles.length === 1) {
+                    if (storedData.needles.length === 1) {
                         // only one needle so ignore topic
-                        needles[0].value = msg.payload
+                        storedData.needles[0].value = msg.payload
                     } else {
                         // find the needle with the matching topic
-                        const needle = needles.find((element) => element.topic === msg.topic);
+                        const needle = storedData.needles.find((element) => element.topic === msg.topic);
                         if (needle) {
                             needle.value = msg.payload
                         } else {
@@ -42,34 +38,29 @@ module.exports = function (RED) {
                         }
                     }
                 }
-                // add the needles into the message
-                msg.needles = needles
 
                 // does msg.ui_update exist and is an object?
                 if (typeof msg.ui_update === 'object' && !Array.isArray(msg.ui_update) && msg.ui_update !== null) {
                     // yes it does
-                    ui_update ??= {}    // initialise if necessary
+                    storedData.ui_update ??= {}    // initialise if necessary
                     // merge in data from this message
-                    ui_update = {...ui_update, ...msg.ui_update}
+                    storedData.ui_update = {...storedData.ui_update, ...msg.ui_update}
                 }
                 // pick up msg.formattedValue if present and is a string
                 if (typeof msg.formattedValue === "string") {
-                    formattedValue = msg.formattedValue
-                }
-
-                // include joined ui_update in the message if it exists
-                if (ui_update) {
-                    msg.ui_update = ui_update
-                }
-                // include joined formattedValue if present
-                if (formattedValue) {
-                    msg.formattedValue = formattedValue
+                    storedData.formattedValue = msg.formattedValue
                 }
 
                 // store the latest value in our Node-RED datastore
-                base.stores.data.save(base, node, msg)
+                //console.log(`leaving onInput storedData: ${JSON.stringify(storedData)}\n\n`)
+                base.stores.data.save(base, node, storedData)
                 // send it to any connected nodes in Node-RED
+                // hack to work around the fact that send() always sends the original msg object
+                for (const property in storedData) {
+                    msg[property] = storedData[property]
+                }
                 send(msg)
+                //send(storedData)
             },
             onSocket: {
                 /*
