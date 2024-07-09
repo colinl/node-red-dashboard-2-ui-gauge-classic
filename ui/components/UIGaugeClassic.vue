@@ -12,8 +12,9 @@
                 <path class="tick-minor" stroke-width="5" :d="arcspec" :style="this.minorTickStyle"></path>
                 <path ref="arc" class="tick-major" stroke-width="5" :d="arcspec" :style="this.majorTickStyle"></path>
 
-                <text v-for="(item, index) in numbers" :key="index" class="num" text-anchor="middle" :y="`${10.5-this.arc.radius}`" 
-                  :style="`transform-origin: ${this.arc.cx}% ${this.arc.cy/this.widgetSizeRatio}%; transform: rotate(${item.r}deg) translate(${this.arc.cx}%, ${this.arc.cy/widgetSizeRatio}%);`">
+
+                  <text v-for="(item, index) in numbers" :key="index" class="num" text-anchor="middle" :y="`${10.5-this.arc.radius}`" 
+                  :style="`--to-x: ${this.arc.cx}; --to-y:${this.arc.cy/this.widgetSizeRatio}; --t-r:${item.r}; --tt-x:${this.arc.cx}; --tt-y:${this.arc.cy/widgetSizeRatio};`">
                   {{item.n}}</text>
 
                 <text class="label" y="0" x="50%" text-anchor="middle">{{label}}</text>
