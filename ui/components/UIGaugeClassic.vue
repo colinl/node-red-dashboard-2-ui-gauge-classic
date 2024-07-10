@@ -13,9 +13,9 @@
                 <path ref="arc" class="tick-major" stroke-width="5" :d="arcspec" :style="this.majorTickStyle"></path>
 
 
-                  <text v-for="(item, index) in numbers" :key="index" class="num" text-anchor="middle" :y="`${10.5-this.arc.radius}`" 
+                  <g class="num-wrap" v-for="(item, index) in numbers" :key="index"  
                   :style="`--to-x: ${this.arc.cx}; --to-y:${this.arc.cy/this.widgetSizeRatio}; --t-r:${item.r}; --tt-x:${this.arc.cx}; --tt-y:${this.arc.cy/widgetSizeRatio};`">
-                  {{item.n}}</text>
+                  <text class="num" text-anchor="middle" :y="`${10.5-this.arc.radius}`">{{item.n}}</text></g>
 
                 <text class="label" y="0" x="50%" text-anchor="middle">{{label}}</text>
                 <text class="measurement" :y="`${this.arc.cy-16}`" x="50%" text-anchor="middle">{{measurement}}</text>

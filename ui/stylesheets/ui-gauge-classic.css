@@ -30,12 +30,15 @@
     fill:currentColor;
     font-size:0.5rem;
 }
+.cl-gauge .num-wrap{
+    transform-origin: calc(var(--to-x) * 1%) calc(var(--to-y) * 1%);
+    transform: rotate(calc(var(--t-r) * 1deg)) translate(calc(var(--tt-x) * 1%),calc(var(--tt-y) * 1%));
+}
 .cl-gauge .num{
     fill:currentColor;
     fill-opacity:0.6;
     font-size:.35rem;
-    transform-origin: calc(var(--to-x) * 1%) calc(var(--to-y) * 1%);
-    transform: rotate(calc(var(--t-r) * 1deg)) translate(calc(var(--tt-x) * 1%),calc(var(--tt-y) * 1%));
+   
 }
 .cl-gauge .tick-minor{
     fill:none;
