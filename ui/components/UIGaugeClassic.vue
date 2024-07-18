@@ -37,6 +37,8 @@
 //import { markRaw } from 'vue'
 import { mapState } from 'vuex'
 
+const logEvents = false  // whether to log incoming messages and events
+
 export default {
     name: 'UIGaugeClassic',
     inject: ['$socket'],
@@ -147,7 +149,7 @@ export default {
         this.$socket.on('widget-load:' + this.id, (msg) => {
             // load the latest message from the Node-RED datastore when this widget is loaded
             // storing it in our vuex store so that we have it saved as we navigate around
-            //console.log(`On widget-load ${JSON.stringify(msg)}`)
+            if (logEvents) console.log(`On widget-load ${JSON.stringify(msg)}`)
             this.processMsg(msg)     // pick up message values
         /*
             this.$store.commit('data/bind', {
@@ -157,7 +159,7 @@ export default {
         */
         })
         this.$socket.on('msg-input:' + this.id, (msg) => {
-            //console.log(`Message received: ${JSON.stringify(msg)}`)
+            if (logEvents) console.log(`Message received: ${JSON.stringify(msg)}`)
             // new message received
             this.processMsg(msg)
 
@@ -168,7 +170,7 @@ export default {
             })
         })
 
-        //console.log(`mounted, props: ${JSON.stringify(this.props)}`)
+        if (logEvents) console.log(`mounted, props: ${JSON.stringify(this.props)}`)
         // pickup node properties to local data
         this.pickupProperties()
         // initialise needle positions
@@ -286,17 +288,6 @@ export default {
         processMsg: function(msg) {
             // The message fed in is processed in ui-gauge-classic.js and needle values are joined into msg.needles
             //console.log(`processMessage, $refs: ${JSON.stringify(this.$refs)}`)
-            if (msg.needles) {
-                this.needles.forEach((needle, index) => {
-                    const v = this.validate(msg.needles[index]?.value)       // this copes with undefined value
-                    // the value displayed is from the first needle
-                    if (index === 0) {
-                        // value displayed is for the first needle
-                        this.value = v
-                    }
-                    needle.rotation = this.rotation(v)
-                })
-            }
             if (Array.isArray(msg.ui_update?.sectors)) {
                 // a sectors array is included
                 this.sectors = msg.ui_update.sectors
@@ -312,10 +303,45 @@ export default {
             if (msg.ui_update?.units  &&  typeof msg.ui_update.units === 'string') {
                 this.units = msg.ui_update.units
             }
+            if (msg.ui_update && "min" in msg.ui_update) {
+                this.min = msg.ui_update.min
+            }
+            if (msg.ui_update && "max" in msg.ui_update) {
+                this.max = msg.ui_update.max
+            }
+            // precalculate stuff if any ui_updates present
+            if ("ui_update" in msg) {
+                // pre-calculate the styles for the sectors
+                this.calcSectorStyles()
+                // precalculate tick styles
+                this.minorTickStyle = this.calcTickStyle(this.minorDivision, 0.5)
+                this.majorTickStyle = this.calcTickStyle(this.majorDivision, 1)
+                // needle positions may have changed due to scale changes
+                this.recalcNeedlePositions()
+            }
             // pick up formattedValue if present (checked to be string in js file)
             if (msg.formattedValue) {
                 this.formattedValue = msg.formattedValue
             }
+            // do this last as the config may have been changed by other stuff in the message
+            if (msg.needles) {
+                this.needles.forEach((needle, index) => {
+                    const v = this.validate(msg.needles[index]?.value)       // this copes with undefined value
+                    needle.value = v
+                    // the value displayed is from the first needle
+                    if (index === 0) {
+                        // value displayed is for the first needle
+                        this.value = v
+                    }
+                    needle.rotation = this.rotation(v)
+                })
+            }
+        },
+        recalcNeedlePositions: function() {
+                console.log(`recalcNeedlePositions needles: ${JSON.stringify(this.needles)}`)
+            this.needles.forEach((needle, index) => {
+                needle.rotation = this.rotation(needle.value)
+            })
         },
         validate: function(data){
             let ret                
