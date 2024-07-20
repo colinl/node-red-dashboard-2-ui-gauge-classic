@@ -304,10 +304,10 @@ export default {
                 this.units = msg.ui_update.units
             }
             if (msg.ui_update && "min" in msg.ui_update) {
-                this.min = msg.ui_update.min
+                this.min = Number(msg.ui_update.min)
             }
             if (msg.ui_update && "max" in msg.ui_update) {
-                this.max = msg.ui_update.max
+                this.max = Number(msg.ui_update.max)
             }
             // precalculate stuff if any ui_updates present
             if ("ui_update" in msg) {
@@ -338,7 +338,6 @@ export default {
             }
         },
         recalcNeedlePositions: function() {
-                console.log(`recalcNeedlePositions needles: ${JSON.stringify(this.needles)}`)
             this.needles.forEach((needle, index) => {
                 needle.rotation = this.rotation(needle.value)
             })
