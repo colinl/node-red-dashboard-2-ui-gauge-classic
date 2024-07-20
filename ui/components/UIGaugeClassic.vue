@@ -395,19 +395,17 @@ export default {
             return nums 
         },
         rotation:function(v){
-            // allow pointer to go 10% off ends of scale, but not more than half way to the other end of the scale
-            // except in the special case of widget height is half the width, in which case only 2% so that needle does not go
-            // off the bottom
-            const factor = (this.height/this.width == 0.5) ? 0.02 : 0.1
             const deltaDeg = this.arc.endDegrees - this.arc.startDegrees
-            const gapDeg = 360 - deltaDeg
-            const overflowFactor = Math.min(factor, gapDeg/2/deltaDeg)
-            const overflow = (this.max-this.min)*overflowFactor
-            const angleOverflow = (deltaDeg)*overflowFactor 
+            // allow the needle to go a bit off the end when conditions allow
+            let rotationLimitDeg = this.calcRotationLimitDegrees()
+            // stop it limiting to less than the full range
+            if (rotationLimitDeg < this.arc.sweepAngle/2) rotationLimitDeg = this.arc.sweepAngle/2
+            const minAngle = - rotationLimitDeg
+            const maxAngle = rotationLimitDeg
+            // calc limit in user units
+            const overflow = (rotationLimitDeg - this.arc.sweepAngle/2) * (this.max - this.min)/this.arc.sweepAngle
             const min = this.min - overflow
             const max = this.max + overflow
-            const minAngle = this.arc.startDegrees - angleOverflow
-            const maxAngle = this.arc.endDegrees + angleOverflow
             const params = {minIn:min, maxIn:max, minOut:minAngle, maxOut:maxAngle};
             if (v === null) {
                 v = Math.min(min, max)
@@ -452,6 +450,37 @@ export default {
             const length = (this.arc.radius - 4.5) * lengthPercent/100
             return `<path d="M ${cx},${cy} ${cx-1.5},${cy} ${cx-0.15},${cy-length} ${cx+0.15},${cy-length} ${cx+1.5},${cy} z"
                 fill="${color}"></path>`
+        },
+        calcRotationLimitDegrees: function() {
+            /** Determines the needle rotation limit which prevents the needle
+             * from being clipped by the lower limit of the view box.
+             * The answer is in degrees measured from the vertical. So the range is
+             * plus and minus this value.
+             */
+            // default to 15 deg off each end, but not allowing wrap around
+            let answer = Math.min(this.arc.sweepAngle/2 + 15, 180)
+            if (this.height) {
+                // not auto height
+                const aspectRatio = this.height/this.width
+                // calc distance between centre and bottom
+                const h = 100*aspectRatio - this.arc.cy
+                // if this is greater than the length of the needle then no need to limit
+                // assume 100% needle length, it isn't worth worrying about greater lengths
+                const l = this.arc.radius - 4.5
+                if (h < l) {
+                    // if h is -ve, so hub is off the bottom, then limit to scale range
+                    if (h > 0) {
+                        // calc angle (degrees) between vertical and needle just touching the bottom edge
+                        const alpha = Math.acos(h/l) * 57.2958
+                        // we need the angle from the vertical, and limit to 20 deg off end of scale
+                        answer = Math.min(180 - alpha, this.arc.sweepAngle/2 + 15)
+                    } else {
+                        // h is -ve
+                        answer = this.arc.sweepAngle/2
+                    }
+                }
+            }
+            return answer
         },
     },
 }
