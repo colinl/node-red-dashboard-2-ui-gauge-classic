@@ -295,12 +295,12 @@ export default {
                 this.calcSectorStyles()
             }
             // check for dynamic settings for measurement and units, and pick them up
-            if (msg.ui_update?.measurement  &&  typeof msg.ui_update.measurement === 'string') {
+            if (typeof msg.ui_update?.measurement === 'string') {
                 this.measurement = msg.ui_update.measurement
                 // position units and value text above or below centre dependent on whether measurement text is provided
                 this.calcTextPositions()
             }
-            if (msg.ui_update?.units  &&  typeof msg.ui_update.units === 'string') {
+            if (typeof msg.ui_update?.units === 'string') {
                 this.units = msg.ui_update.units
             }
             if (msg.ui_update && "min" in msg.ui_update) {
