@@ -22,7 +22,7 @@
                 <text class="units" :y="`${this.unitsTextY}`" x="50%" text-anchor="middle">{{units}}</text>
                 <text class="value" :y="`${this.valueTextY}`" x="50%" text-anchor="middle">{{displayValue}}</text>
             </g>
-            <g v-for="(needle, index) in needles" :ref="'o-needle-'+index" class="o-needle" 
+            <g v-for="(needle, index) in needles" :class="`o-needle o-needle-${index+1}`"
               :style="`transform-box: fill-box; transform-origin: 50% 100%; rotate: ${needle.rotation};`"
               v-html="needle.path">
             </g>
