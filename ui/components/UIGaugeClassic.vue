@@ -3,7 +3,7 @@
 -->
 <template>
     <!-- Component must be wrapped in a block so props such as className and style can be passed in from parent -->
-    <div className="ui-gauge-cl-wrapper" :class="class" :style="wrapperStyle">
+    <div :className="`ui-gauge-cl-wrapper ${props.myclass}`" :style="wrapperStyle" ref="wrapper">
         <svg class="cl-gauge" ref="cl-gauge" width="100%" height="100%" :view-box.camel="theViewBox" :style="`--dash: ${this.arc.arcLength};`">
             <g>
                 <path v-for="(item, index) in sectors" :key="index" :ref="'sector-' + index" class="sector" stroke-width="5" 
@@ -37,7 +37,7 @@
 //import { markRaw } from 'vue'
 import { mapState } from 'vuex'
 
-const logEvents = false  // whether to log incoming messages and events
+const logEvents = true  // whether to log incoming messages and events
 
 export default {
     name: 'UIGaugeClassic',
@@ -147,6 +147,7 @@ export default {
     },
     mounted () {
         this.$socket.on('widget-load:' + this.id, (msg) => {
+            //console.log(`$refs: ${JSON.stringify(this.$refs)}`)
             // load the latest message from the Node-RED datastore when this widget is loaded
             // storing it in our vuex store so that we have it saved as we navigate around
             if (logEvents) console.log(`On widget-load ${JSON.stringify(msg)}`)
@@ -204,7 +205,6 @@ export default {
             this.measurement = props.measurement
             this.needles = props.needles
             this.arc.sweepAngle = props.sweep_angle || 246
-            this.class = props.myclass
 
             this.calculateDerivedValues()
         },
@@ -287,7 +287,6 @@ export default {
         },
         processMsg: function(msg) {
             // The message fed in is processed in ui-gauge-classic.js and needle values are joined into msg.needles
-            //console.log(`processMessage, $refs: ${JSON.stringify(this.$refs)}`)
             if (Array.isArray(msg.ui_update?.sectors)) {
                 // a sectors array is included
                 this.sectors = msg.ui_update.sectors
@@ -335,6 +334,17 @@ export default {
                     }
                     needle.rotation = this.rotation(v)
                 })
+            }
+            // if msg.ui_update.class is provided and is a string then move it into msg.class
+            if (typeof msg.ui_update?.class == "string") {
+                msg.class = msg.ui_update.class
+            }
+            if ("class" in msg) {
+                // Hack to remove class added by msg.class at the outermost widget element and replace with new value
+                //console.log(`outer class: ${this.$refs.wrapper.parentNode.className}`)
+                const classes = this.$refs.wrapper.parentNode.className.split(' ')
+                this.$refs.wrapper.parentNode.className = `${classes[0]} ${classes[1]} ${msg.class}`
+                //console.log(`now: ${this.$refs.wrapper.parentNode.className}`)
             }
         },
         recalcNeedlePositions: function() {
