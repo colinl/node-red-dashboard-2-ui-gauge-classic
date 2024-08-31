@@ -335,17 +335,20 @@ export default {
                     needle.rotation = this.rotation(v)
                 })
             }
-            // if msg.ui_update.class is provided and is a string then move it into msg.class
+            // if msg.class or msg.ui_update.class is provided then remove any previous dynamic class and replace with this one
             if (typeof msg.ui_update?.class == "string") {
-                msg.class = msg.ui_update.class
+                this.updateDynamicClass(msg.ui_update.class)
             }
             if ("class" in msg) {
-                // Hack to remove class added by msg.class at the outermost widget element and replace with new value
-                //console.log(`outer class: ${this.$refs.wrapper.parentNode.className}`)
-                const classes = this.$refs.wrapper.parentNode.className.split(' ')
-                this.$refs.wrapper.parentNode.className = `${classes[0]} ${classes[1]} ${msg.class}`
-                //console.log(`now: ${this.$refs.wrapper.parentNode.className}`)
+                this.updateDynamicClass(msg.class)
             }
+        },
+        updateDynamicClass: function (newClass) {
+            // Hack to remove class added by msg.class at the outermost widget element and replace with new value
+            console.log(`outer class: ${this.$refs.wrapper.parentNode.className}`)
+            const classes = this.$refs.wrapper.parentNode.className.split(' ')
+            this.$refs.wrapper.parentNode.className = `${classes[0]} ${classes[1]} ${newClass}`
+            console.log(`now: ${this.$refs.wrapper.parentNode.className}`)
         },
         recalcNeedlePositions: function() {
             this.needles.forEach((needle, index) => {
