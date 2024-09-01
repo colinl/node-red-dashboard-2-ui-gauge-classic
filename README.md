@@ -48,6 +48,8 @@ Details of the dynamic properties available are as follows:
 * **Units** - If `msg.ui_update.units` is present and contains a string then that string will be displayed in the units field in the gauge.
 * **Range min and max** - If `msg.ui_update.min` and/or `msg.ui_update.max` are present then range min and max will be updated accordingly.
 
+* **Dynamic Class** - If `msg.class` or `msg.ui_update.class` are present then the specified class or classes will be applied to the outermost widget element.  This is in addition to any class or classes specified in the configuration.  Passing an empty string will clear the dynamic class.
+
 ## CSS overrides
 
 Display elements my be overriden in the normal way using a ui-template node.  In particular:
@@ -67,6 +69,23 @@ Which will cause the needles to transition in 0.1 seconds allowing them to track
 }
 ```
 Or leave off the `.myclass` to affect all gauges.
+
+**Hide individual needles** - Individual needles on a gauge can be hidden by adding a `ui-template` node of type CSS containing, for example
+```
+/** this allows hiding of individual needles by sending needle identifier in msg.class to a gauge, for example
+ * msg.class = "hide_needle-1"                // hide needle 1 and show others
+ * msg.class = "hide-needle-2 hide-needle-3"  // hide needles 2 and 3 and show others
+ * msg.class = ""                             // shows all needles
+*/
+.hide-needle-1 .o-needle-1,
+.hide-needle-2 .o-needle-2,
+.hide-needle-3 .o-needle-3 {
+    visibility: hidden;
+}
+```
+Then sending `msg.class` or `msg.ui_update.class` to the node containing values as shown above will selectively hide or show needles.  If more than three needles are required then add those needles to the class list in the template.
+
+The Multi Needle example included with the node shows this in action.
 
 ## Example gauge images
 

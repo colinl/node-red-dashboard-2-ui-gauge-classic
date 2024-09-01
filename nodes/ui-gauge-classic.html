@@ -521,6 +521,8 @@ Details of the dynamic properties available are as follows:
 * **Units** - If `msg.ui_update.units` is present and contains a string then that string will be displayed in the units field in the gauge.
 * **Range min and max** - If `msg.ui_update.min` and/or `msg.ui_update.max` are present then range min and max will be updated accordingly.
 
+* **Dynamic Class** - If `msg.class` or `msg.ui_update.class` are present then the specified class or classes will be applied to the outermost widget element.  This is in addition to any class or classes specified in the configuration.  Passing an empty string will clear the dynamic class.
+
 ### CSS overrides
 
 Display elements my be overriden in the normal way using a ui-template node.  In particular:
@@ -532,5 +534,7 @@ Display elements my be overriden in the normal way using a ui-template node.  In
 }
 ```
 Which will cause the needles to transition in 0.1 seconds allowing them to track the input accurately.
+
+Other useful overrides, including how to temporarily hide individual needles, are described in the node's [README](https://github.com/colinl/node-red-dashboard-2-ui-gauge-classic).
 
 </script>
