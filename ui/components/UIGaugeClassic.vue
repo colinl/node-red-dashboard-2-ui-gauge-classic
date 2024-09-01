@@ -319,7 +319,7 @@ export default {
                 this.recalcNeedlePositions()
             }
             // pick up formattedValue if present (checked to be string in js file)
-            if (msg.formattedValue) {
+            if (typeof msg.formattedValue === "string") {
                 this.formattedValue = msg.formattedValue
             }
             // do this last as the config may have been changed by other stuff in the message
