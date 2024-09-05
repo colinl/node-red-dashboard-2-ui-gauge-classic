@@ -3,7 +3,7 @@
 -->
 <template>
     <!-- Component must be wrapped in a block so props such as className and style can be passed in from parent -->
-    <div :className="`ui-gauge-cl-wrapper ${props.myclass}`" :style="wrapperStyle" ref="wrapper">
+    <div :className="ui-gauge-cl-wrapper" :class="class" :style="wrapperStyle" ref="wrapper">
         <svg class="cl-gauge" ref="cl-gauge" width="100%" height="100%" :view-box.camel="theViewBox" :style="`--dash: ${this.arc.arcLength};`">
             <g>
                 <path v-for="(item, index) in sectors" :key="index" :ref="'sector-' + index" class="sector" stroke-width="5" 
@@ -37,7 +37,7 @@
 //import { markRaw } from 'vue'
 import { mapState } from 'vuex'
 
-const logEvents = true  // whether to log incoming messages and events
+const logEvents = false  // whether to log incoming messages and events
 
 export default {
     name: 'UIGaugeClassic',
@@ -205,6 +205,7 @@ export default {
             this.measurement = props.measurement
             this.needles = props.needles
             this.arc.sweepAngle = props.sweep_angle || 246
+            this.class = props.myclass
 
             this.calculateDerivedValues()
         },
