@@ -55,6 +55,8 @@ module.exports = function (RED) {
                 // pick up msg.formattedValue if present and is a string
                 if (typeof msg.formattedValue === "string") {
                     storedData.formattedValue = msg.formattedValue
+                } else {
+                    delete storedData.formattedValue
                 }
 
                 // store the latest full set of values in our Node-RED datastore

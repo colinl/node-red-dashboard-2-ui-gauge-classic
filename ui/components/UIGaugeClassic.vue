@@ -128,8 +128,11 @@ export default {
         displayValue: function() {
             // Shows --- for the value until a valid value is received, then shows msg.formattedValue if provided, 
             // or the value from first needle
-            let value = this.formattedValue         // value from msg if provided
-            value ||= (this.value !== null  ?  this.value.toFixed(this.valueDecimalPlaces)  :  "---")
+            let value = this.formattedValue        // value from msg if provided
+            if (typeof value != "string") {
+                // no formattedValue provided so show the number
+                value = this.value !== null  ?  this.value.toFixed(this.valueDecimalPlaces)  :  "---"
+            }
             return value
         },
         numbers: function() {
@@ -322,6 +325,8 @@ export default {
             // pick up formattedValue if present (checked to be string in js file)
             if (typeof msg.formattedValue === "string") {
                 this.formattedValue = msg.formattedValue
+            } else {
+                this.formattedValue = null
             }
             // do this last as the config may have been changed by other stuff in the message
             if (msg.needles) {
