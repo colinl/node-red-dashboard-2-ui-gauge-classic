@@ -154,6 +154,9 @@ export default {
             // load the latest message from the Node-RED datastore when this widget is loaded
             // storing it in our vuex store so that we have it saved as we navigate around
             if (logEvents) console.log(`On widget-load ${JSON.stringify(msg)}`)
+            // Since dashboard v1.21 the way the data store is used has changed and so I have had to 
+            // store the ui_updates in a structure called my_ui_updates.  Setup msg.ui_update to this
+            msg.ui_update = msg.my_ui_update
             this.processMsg(msg)     // pick up message values
         /*
             this.$store.commit('data/bind', {

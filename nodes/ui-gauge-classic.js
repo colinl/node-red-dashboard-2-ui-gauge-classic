@@ -43,11 +43,13 @@ module.exports = function (RED) {
                 }
 
                 // does msg.ui_update exist and is an object?
+                // NOTE since dashboard v1.21 I cannot store ui_update in data store as the core code will remove it
+                // since the new way is to use the state store for that, so call it my_ui_update instead
                 if (typeof msg.ui_update === 'object' && !Array.isArray(msg.ui_update) && msg.ui_update !== null) {
                     // yes it does
-                    storedData.ui_update ??= {}    // initialise if necessary
+                    storedData.my_ui_update ??= {}    // initialise if necessary
                     // merge in data from this message
-                    storedData.ui_update = {...storedData.ui_update, ...msg.ui_update}
+                    storedData.my_ui_update = {...storedData.my_ui_update, ...msg.ui_update}
                 } else {
                     // delete any msg.ui_update so don't need to validate in clients
                     delete msg.ui_update
@@ -60,8 +62,8 @@ module.exports = function (RED) {
                 }
 
                 // store the latest full set of values in our Node-RED datastore
-                //console.log(`leaving onInput storedData: ${JSON.stringify(storedData)}\n\n`)
                 base.stores.data.save(base, node, storedData)
+                // console.log(`leaving onInput, data store: ${JSON.stringify(base.stores.data.get(node.id))}\n\n`)
                 // send the message with modified properties to the clients
                 send(msg)
             },
