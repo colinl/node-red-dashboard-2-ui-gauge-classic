@@ -511,3 +511,19 @@ export default {
     /* CSS is auto scoped, but using named classes is still recommended */
     @import "../stylesheets/ui-gauge-classic.css";
 </style>
+
+<style>
+    /**
+    * Change to overwrite mods in dashboard 1.24.0 which stops the gauge using as much height as it wants
+    * when the gauge is set to a fixed size.
+    * It isn't possible to override this in user defined CSS so if I needed to allow this I would have to
+    * add a property to enable it and make it dynamic in some way
+    *
+    * Note, this must not be in the scoped section as it is applied to the outer container div
+    */
+    .nrdb-ui-widget.nrdb-ui-gauge-classic
+    {
+        grid-row-end: span null !important;
+        grid-template-rows: repeat(0, var(--widget-row-height)) !important;
+    }
+</style>
