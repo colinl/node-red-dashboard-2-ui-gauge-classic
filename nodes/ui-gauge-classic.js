@@ -21,6 +21,35 @@ module.exports = function (RED) {
                 let storedData = base.stores.data.get(node.id)
                 //console.log(`onInput storedData: ${JSON.stringify(storedData)}\n\n`)
 
+                // msg.ui_update.needles must be handled first
+                if (typeof msg.ui_update === 'object' && !Array.isArray(msg.ui_update) && msg.ui_update !== null) {
+                    // msg.ui_update.needles must be handled here rather than in the vue file
+                    if ("needles" in msg.ui_update) {
+                        // validate the content
+                        if (validateNeedles(msg.ui_update.needles)) {
+                            // keep the current values for copying across to the new ones for matching topics
+                            const oldNeedles = storedData.needles
+                            storedData.needles = msg.ui_update.needles
+                            storedData.needles.forEach((needle, index) => {
+                                // find the old needle with matching topic
+                                const oldNeedle = oldNeedles.find((element) => element.topic == needle.topic);
+                                if (oldNeedle) {
+                                    // there is a matching one
+                                    needle.value = oldNeedle.value
+                                }
+                            })
+                            msg.needles = storedData.needles
+                            // tell the clients that the needles have changed
+                            msg._needlesChanged = true
+                        } else {
+                            console.log(`Gauge Classic, invalid msg.ui_update.needles: ${JSON.stringify(msg.ui_update.needles)}`)
+                        }
+                        delete msg.ui_update.needles
+                    } else {
+                        delete msg._needlesChanged
+                    }
+                }
+
                 // does msg.payload exist?
                 if (typeof msg.payload != "undefined") {
                     // yes so update value from payload
@@ -88,6 +117,22 @@ module.exports = function (RED) {
         } else {
             node.error('No group configured')
         }
+    }
+
+    /** Check the validy of a msg.ui_update.needles passed in
+     * Returns true if ok, else false
+     */
+    function validateNeedles(needles) {
+        let answer = false
+        // perform basic validity checks, it should be an array where each element has color, length and topic
+        if (Array.isArray(needles)) {
+            const initialValue = true;
+            answer = needles.reduce(
+                (accumulator, currentValue) => accumulator && "color" in currentValue && "lengthPercent" in currentValue && "topic" in currentValue,
+                initialValue,
+            );
+        }
+        return answer
     }
 
     RED.nodes.registerType('ui-gauge-classic', UIGaugeClassicNode)

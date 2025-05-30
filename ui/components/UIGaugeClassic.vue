@@ -310,8 +310,12 @@ export default {
                 if (newAngle > 0 && newAngle <= 360)
                 this.arc.sweepAngle = newAngle
             }
-            // precalculate stuff if any ui_updates present
-            if ("ui_update" in msg) {
+            // if the needles array has changed need to throw away our copy
+            if (msg._needlesChanged) {
+                this.needles = msg.needles
+            }
+            // precalculate stuff if any ui_updates present or needles have been changed
+            if ("ui_update" in msg || msg._needlesChanged) {
                 this.calculateDerivedValues()
                 // pre-calculate the styles for the sectors
                 this.calcSectorStyles()
