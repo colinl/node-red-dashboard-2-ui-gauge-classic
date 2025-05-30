@@ -300,24 +300,12 @@ export default {
                 if (typeof msg.ui_update?.units === 'string') {
                     this.units = msg.ui_update.units
                 }
-                if ("min" in msg.ui_update) {
-                    this.min = Number(msg.ui_update.min)
-                }
-                if ("max" in msg.ui_update) {
-                    this.max = Number(msg.ui_update.max)
-                }
                 if ("sweepAngle" in msg.ui_update) {
                     const newAngle = Number(msg.ui_update.sweepAngle)
                     if (newAngle > 0 && newAngle <= 360)
                         this.arc.sweepAngle = newAngle
                 }
-                if ("majorDivision" in msg.ui_update) {
-                    this.majorDivision = Number(msg.ui_update.majorDivision)
-                }
-                if ("minorDivision" in msg.ui_update) {
-                    this.minorDivision = Number(msg.ui_update.minorDivision)
-                }
-                ["valueDecimalPlaces","scaleDecimalPlaces"].forEach(attr => {
+                ["min", "max", "minorDivision", "majorDivision", "valueDecimalPlaces", "scaleDecimalPlaces"].forEach(attr => {
                     if (attr in msg.ui_update) {
                         this[attr] = Number(msg.ui_update[attr])
                         //console.log(`this[${attr}]: ${this[attr]}`)
@@ -327,7 +315,6 @@ export default {
                 if ("label" in msg.ui_update && typeof msg.ui_update.label === 'string') {
                     this.label = msg.ui_update.label
                 }
-
             }
             // if the needles array has changed need to throw away our copy
             if (msg._needlesChanged) {
