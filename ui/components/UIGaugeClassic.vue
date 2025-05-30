@@ -313,11 +313,17 @@ export default {
                 }
                 if ("majorDivision" in msg.ui_update) {
                     this.majorDivision = Number(msg.ui_update.majorDivision)
-                    console.log(`majorDivs: ${this.majorDivision}`)
                 }
                 if ("minorDivision" in msg.ui_update) {
                     this.minorDivision = Number(msg.ui_update.minorDivision)
                 }
+                ["valueDecimalPlaces","scaleDecimalPlaces"].forEach(attr => {
+                    if (attr in msg.ui_update) {
+                        this[attr] = Number(msg.ui_update[attr])
+                        //console.log(`this[${attr}]: ${this[attr]}`)
+                    }
+                })
+
             }
             // if the needles array has changed need to throw away our copy
             if (msg._needlesChanged) {
