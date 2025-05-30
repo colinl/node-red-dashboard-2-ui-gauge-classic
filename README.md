@@ -49,9 +49,9 @@ Details of the dynamic properties available are as follows:
 * **Range min and max** - If `msg.ui_update.min` and/or `msg.ui_update.max` are present then range min and max will be updated accordingly.
 * **Sweep Angle** - If `msg.ui_update.sweepAngle` is present the the sweep angle is updated accordingly.
 * **Needle Definitions** - If `msg.ui_update.needles` is present and contains an array of needle definitions then these will be used. It must be an array of objects where each object contains attirbutes `color`, `lengthPercent` and `topic`.  An example is `[{"color":"blue","lengthPercent":50,"topic":"pv"},{"color":"orange","lengthPercent":100,"topic":"setpoint"}]`. Note that even if only one needle is required then this must still be an array.
-* **Major and Minor Division values** - If `msg.ui_update.majorDivision` or `msg.ui_update.minorDivision` are present (note: singular, it is the size of the division not the number of them) then the division values will be updated accordingly.
-* **Decimal Places** - If `msg.ui_update.valueDecimalPlaces` or `msg.ui_update.scaleDecimalPlaces` are present then those values will be updated
-* **Lable** - If `msg.ui_update.label` is present and is a string the the label will be updated
+* **Major and Minor Division values** - If `msg.ui_update.majorDivision` and/or `msg.ui_update.minorDivision` are present (note: singular, it is the size of the division not the number of them) then the division values will be updated accordingly.
+* **Decimal Places** - If `msg.ui_update.valueDecimalPlaces` and/or `msg.ui_update.scaleDecimalPlaces` are present then those values will be updated
+* **Label** - If `msg.ui_update.label` is present and is a string the the label will be updated
 
 * **Dynamic Class** - If `msg.class` or `msg.ui_update.class` are present then the specified class or classes will be applied to the outermost widget element.  This is in addition to any class or classes specified in the configuration.  Passing an empty string will clear the dynamic class.
 
