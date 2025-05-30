@@ -324,6 +324,10 @@ export default {
                     }
                 })
 
+                if ("label" in msg.ui_update && typeof msg.ui_update.label === 'string') {
+                    this.label = msg.ui_update.label
+                }
+
             }
             // if the needles array has changed need to throw away our copy
             if (msg._needlesChanged) {
