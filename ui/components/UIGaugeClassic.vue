@@ -3,7 +3,7 @@
 -->
 <template>
     <!-- Component must be wrapped in a block so props such as className and style can be passed in from parent -->
-    <div :className="ui-gauge-cl-wrapper" :class="class" :style="wrapperStyle" ref="wrapper">
+    <div class="ui-gauge-cl-wrapper" :class="class" :style="wrapperStyle"  ref="wrapper">
         <svg class="cl-gauge" ref="cl-gauge" width="100%" height="100%" :view-box.camel="theViewBox" :style="`--dash: ${this.arc.arcLength};`">
             <g>
                 <path v-for="(item, index) in sectors" :key="index" :ref="'sector-' + index" class="sector" stroke-width="5" 
@@ -110,13 +110,7 @@ export default {
     computed: {
         ...mapState('data', ['messages']),
         wrapperStyle: function() {
-            // should not need this, it should be done by the dashboard
-            // See https://discourse.nodered.org/t/custom-ui-node-containing-svg-image-not-sizing-correctly-on-dashboard/88152
-            let rowSpan = this.props.height
-            if (!rowSpan) {
-                rowSpan = "null"    // size is auto
-            }
-            return `grid-row-end: span ${rowSpan};`
+            return `border-style: none; padding: 0px; margin: 0px;`
         },
         arcspec: function() {
             const delta = this.arc.endDegrees - this.arc.startDegrees
@@ -297,14 +291,10 @@ export default {
             if (Array.isArray(msg.ui_update?.sectors)) {
                 // a sectors array is included
                 this.sectors = msg.ui_update.sectors
-                // pre-calculate the styles for the sectors
-                this.calcSectorStyles()
             }
             // check for dynamic settings for measurement and units, and pick them up
             if (typeof msg.ui_update?.measurement === 'string') {
                 this.measurement = msg.ui_update.measurement
-                // position units and value text above or below centre dependent on whether measurement text is provided
-                this.calcTextPositions()
             }
             if (typeof msg.ui_update?.units === 'string') {
                 this.units = msg.ui_update.units
@@ -315,8 +305,14 @@ export default {
             if (msg.ui_update && "max" in msg.ui_update) {
                 this.max = Number(msg.ui_update.max)
             }
+            if (msg.ui_update && "sweepAngle" in msg.ui_update) {
+                const newAngle = Number(msg.ui_update.sweepAngle)
+                if (newAngle > 0 && newAngle <= 360)
+                this.arc.sweepAngle = newAngle
+            }
             // precalculate stuff if any ui_updates present
             if ("ui_update" in msg) {
+                this.calculateDerivedValues()
                 // pre-calculate the styles for the sectors
                 this.calcSectorStyles()
                 // precalculate tick styles
@@ -353,11 +349,8 @@ export default {
             }
         },
         updateDynamicClass: function (newClass) {
-            // Hack to remove class added by msg.class at the outermost widget element and replace with new value
-            console.log(`outer class: ${this.$refs.wrapper.parentNode.className}`)
-            const classes = this.$refs.wrapper.parentNode.className.split(' ')
-            this.$refs.wrapper.parentNode.className = `${classes[0]} ${classes[1]} ${newClass}`
-            console.log(`now: ${this.$refs.wrapper.parentNode.className}`)
+            // Concatenate added classes with that from node properties
+            this.class = `${this.props.myclass} ${newClass}`
         },
         recalcNeedlePositions: function() {
             this.needles.forEach((needle, index) => {
