@@ -288,27 +288,36 @@ export default {
         },
         processMsg: function(msg) {
             // The message fed in is processed in ui-gauge-classic.js and needle values are joined into msg.needles
-            if (Array.isArray(msg.ui_update?.sectors)) {
-                // a sectors array is included
-                this.sectors = msg.ui_update.sectors
-            }
-            // check for dynamic settings for measurement and units, and pick them up
-            if (typeof msg.ui_update?.measurement === 'string') {
-                this.measurement = msg.ui_update.measurement
-            }
-            if (typeof msg.ui_update?.units === 'string') {
-                this.units = msg.ui_update.units
-            }
-            if (msg.ui_update && "min" in msg.ui_update) {
-                this.min = Number(msg.ui_update.min)
-            }
-            if (msg.ui_update && "max" in msg.ui_update) {
-                this.max = Number(msg.ui_update.max)
-            }
-            if (msg.ui_update && "sweepAngle" in msg.ui_update) {
-                const newAngle = Number(msg.ui_update.sweepAngle)
-                if (newAngle > 0 && newAngle <= 360)
-                this.arc.sweepAngle = newAngle
+            if (msg.ui_update) {
+                if (Array.isArray(msg.ui_update?.sectors)) {
+                    // a sectors array is included
+                    this.sectors = msg.ui_update.sectors
+                }
+                // check for dynamic settings for measurement and units, and pick them up
+                if (typeof msg.ui_update?.measurement === 'string') {
+                    this.measurement = msg.ui_update.measurement
+                }
+                if (typeof msg.ui_update?.units === 'string') {
+                    this.units = msg.ui_update.units
+                }
+                if ("min" in msg.ui_update) {
+                    this.min = Number(msg.ui_update.min)
+                }
+                if ("max" in msg.ui_update) {
+                    this.max = Number(msg.ui_update.max)
+                }
+                if ("sweepAngle" in msg.ui_update) {
+                    const newAngle = Number(msg.ui_update.sweepAngle)
+                    if (newAngle > 0 && newAngle <= 360)
+                        this.arc.sweepAngle = newAngle
+                }
+                if ("majorDivision" in msg.ui_update) {
+                    this.majorDivision = Number(msg.ui_update.majorDivision)
+                    console.log(`majorDivs: ${this.majorDivision}`)
+                }
+                if ("minorDivision" in msg.ui_update) {
+                    this.minorDivision = Number(msg.ui_update.minorDivision)
+                }
             }
             // if the needles array has changed need to throw away our copy
             if (msg._needlesChanged) {
