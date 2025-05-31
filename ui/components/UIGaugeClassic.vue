@@ -27,7 +27,7 @@
               v-html="needle.path">
             </g>
             <g>
-                <circle class="hub" :cx="`${this.arc.cx}`" :cy="`${this.arc.cy}`" r="3"></circle>
+                <circle class="hub" :cx="`${this.arc.cx}`" :cy="`${this.arc.cy}`" r="3" :style="`fill: ${this.hubcolor}`"></circle>
             </g>
         </svg>
     </div>
@@ -92,6 +92,7 @@ export default {
                 arcLength: 100,
             },
             keepwidth: true,
+            hubcolor: "black",
             class: "",
 
             //don't change these
@@ -213,6 +214,7 @@ export default {
             this.needles = props.needles
             this.arc.sweepAngle = props.sweep_angle || 246
             this.keepwidth = props.keepwidth ?? true
+            this.hubcolor = props.hubcolor ?? "black"
             this.class = props.myclass
 
             this.calculateDerivedValues()
@@ -322,6 +324,10 @@ export default {
 
                 if ("label" in msg.ui_update && typeof msg.ui_update.label === 'string') {
                     this.label = msg.ui_update.label
+                }
+
+                if ("hubcolor" in msg.ui_update && typeof msg.ui_update.hubcolor === 'string') {
+                    this.hubcolor = msg.ui_update.hubcolor
                 }
             }
             // if the needles array has changed need to throw away our copy

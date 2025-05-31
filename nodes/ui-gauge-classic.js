@@ -15,6 +15,7 @@ module.exports = function (RED) {
         
         // Default new properties if not present
         node.keepwidth = config.keepwidth ?? true;
+        node.hubcolor = config.hubcolor ?? "black"
 
         // server-side event handlers
         const evts = {
