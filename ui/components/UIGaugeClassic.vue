@@ -111,7 +111,7 @@ export default {
     computed: {
         ...mapState('data', ['messages']),
         wrapperStyle: function() {
-            return `border-style: none; padding: 0px; margin: 0px;`
+            return ""
         },
         arcspec: function() {
             const delta = this.arc.endDegrees - this.arc.startDegrees
@@ -159,7 +159,6 @@ export default {
                     msg
                 })
             */
-            //console.log( `mounting: ${this.label} keepwidth: ${this.keepwidth}`)
             if (this.keepwidth) {
                 // Hack to change the properties of the outermost widget element so that it can expand vertically if necessary
                 // this means that if, for example, it is sized at 3x3 then it can use more than three dashboard rows if necessary
