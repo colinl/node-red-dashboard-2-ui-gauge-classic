@@ -91,6 +91,7 @@ export default {
                 endy: 90,
                 arcLength: 100,
             },
+            keepwidth: true,
             class: "",
 
             //don't change these
@@ -152,12 +153,19 @@ export default {
             // store the ui_updates in a structure called my_ui_updates.  Setup msg.ui_update to this
             msg.ui_update = msg.my_ui_update
             this.processMsg(msg)     // pick up message values
-        /*
-            this.$store.commit('data/bind', {
-                widgetId: this.id,
-                msg
-            })
-        */
+            /*
+                this.$store.commit('data/bind', {
+                    widgetId: this.id,
+                    msg
+                })
+            */
+            //console.log( `mounting: ${this.label} keepwidth: ${this.keepwidth}`)
+            if (this.keepwidth) {
+                // Hack to change the properties of the outermost widget element so that it can expand vertically if necessary
+                // this means that if, for example, it is sized at 3x3 then it can use more than three dashboard rows if necessary
+                this.$refs.wrapper.parentNode.style["grid-template-rows"] = "repeat(0, var(--widget-row-height))"
+                this.$refs.wrapper.parentNode.style["grid-row-end"] = "span null"
+            }
         })
         this.$socket.on('msg-input:' + this.id, (msg) => {
             if (logEvents) console.log(`Message received: ${JSON.stringify(msg)}`)
@@ -205,6 +213,7 @@ export default {
             this.measurement = props.measurement
             this.needles = props.needles
             this.arc.sweepAngle = props.sweep_angle || 246
+            this.keepwidth = props.keepwidth ?? true
             this.class = props.myclass
 
             this.calculateDerivedValues()
@@ -513,20 +522,4 @@ export default {
 <style scoped>
     /* CSS is auto scoped, but using named classes is still recommended */
     @import "../stylesheets/ui-gauge-classic.css";
-</style>
-
-<style>
-    /**
-    * Change to overwrite mods in dashboard 1.24.0 which stops the gauge using as much height as it wants
-    * when the gauge is set to a fixed size.
-    * It isn't possible to override this in user defined CSS so if I needed to allow this I would have to
-    * add a property to enable it and make it dynamic in some way
-    *
-    * Note, this must not be in the scoped section as it is applied to the outer container div
-    */
-    .nrdb-ui-widget.nrdb-ui-gauge-classic
-    {
-        grid-row-end: span null !important;
-        grid-template-rows: repeat(0, var(--widget-row-height)) !important;
-    }
 </style>

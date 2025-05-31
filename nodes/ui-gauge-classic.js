@@ -12,6 +12,9 @@ module.exports = function (RED) {
 
         // initialise data store on startup or deploy
         base.stores.data.save(base, node, {needles: config.needles})
+        
+        // Default new properties if not present
+        node.keepwidth = config.keepwidth ?? true;
 
         // server-side event handlers
         const evts = {
